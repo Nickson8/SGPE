@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block title %}Recinto - {{ recinto.nome }}{% endblock %}
+
+{% block content %}
+<div class="mb-6 animate-fade-in">
+    <div class="flex items-center gap-3 mb-2">
+        <a href="{% url 'recintos_selecao' %}" class="text-forest-600 hover:text-forest-800 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </a>
+        <h1 class="text-3xl font-bold text-forest-950">Detalhes do Recinto</h1>
+    </div>
+</div>
+
+<!-- Ficha do Recinto (Hero) -->
+<div class="glass-card rounded-2xl p-6 shadow-lg mb-6 animate-fade-in-delay-1">
+    <div class="flex flex-col md:flex-row items-start gap-6">
+        <div class="w-20 h-20 bg-gradient-to-br from-emerald-500 to-forest-700 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+        </div>
+        <div class="flex-1">
+            <h2 class="text-2xl font-bold text-forest-900">{{ recinto.nome }}</h2>
+            <p class="text-forest-600 text-sm mt-1">Código GEFAU: {{ recinto.recinto_gefau }}</p>
+
+            <div class="flex flex-wrap gap-3 mt-4">
+                <div class="bg-forest-50 px-4 py-2 rounded-xl">
+                    <p class="text-xs text-forest-500">Capacidade</p>
+                    <p class="text-lg font-bold text-forest-800">{{ recinto.cap_maxima }}</p>
+                </div>
+                <div class="bg-forest-50 px-4 py-2 rounded-xl">
+                    <p class="text-xs text-forest-500">Animais</p>
+                    <p class="text-lg font-bold text-forest-800">{{ recinto.qnt_animais }}</p>
+                </div>
+                <div class="bg-forest-50 px-4 py-2 rounded-xl">
+                    <p class="text-xs text-forest-500">Espécies</p>
+                    <p class="text-lg font-bold text-forest-800">{{ recinto.qnt_especies }}</p>
+                </div>
+            </div>
+
+            <!-- Barra de ocupação grande -->
+            <div class="mt-5 max-w-md">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm text-forest-700 font-medium">Ocupação</span>
+                    <span class="text-sm font-bold
+                        {% if recinto.status_ocupacao == 'critico' %}text-red-600
+                        {% elif recinto.status_ocupacao == 'alerta' %}text-amber-600
+                        {% else %}text-forest-600{% endif %}">
+                        {{ recinto.percentual_ocupacao }}%
+                    </span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-4 overflow-hidden">
+                    <div class="h-full rounded-full transition-all duration-1000
+                        {% if recinto.status_ocupacao == 'critico' %}bg-gradient-to-r from-red-400 to-red-600
+                        {% elif recinto.status_ocupacao == 'alerta' %}bg-gradient-to-r from-amber-400 to-amber-600
+                        {% else %}bg-gradient-to-r from-forest-400 to-forest-600{% endif %}"
+                         style="width: {{ recinto.percentual_ocupacao }}%"></div>
+                </div>
+                {% if recinto.status_ocupacao == 'critico' %}
+                <p class="text-xs text-red-500 mt-1 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                    Capacidade excedida! Considere realocar animais.
+                </p>
+                {% elif recinto.status_ocupacao == 'alerta' %}
+                <p class="text-xs text-amber-500 mt-1">⚠️ Próximo da capacidade máxima</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Animais Alocados -->
+    <div class="glass-card rounded-2xl p-6 shadow-md animate-fade-in-delay-2">
+        <h3 class="text-lg font-semibold text-forest-900 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-forest-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Animais Alocados Atualmente
+        </h3>
+
+        {% if alocacoes_atuais %}
+        <div class="space-y-2">
+            {% for aloc in alocacoes_atuais %}
+            <a href="{% url 'prontuario_detalhes' aloc.animal.nro_reg %}"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-forest-50 transition-colors group">
+                <div class="w-10 h-10 bg-gradient-to-br from-teal-500 to-forest-600 rounded-xl flex items-center justify-center text-white font-bold text-xs shrink-0 group-hover:scale-110 transition-transform">
+                    {{ aloc.animal.apelido|default:aloc.animal.nro_reg|truncatechars:2|upper }}
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="font-medium text-forest-900 text-sm group-hover:text-teal-700 transition-colors">{{ aloc.animal.apelido|default:aloc.animal.nro_reg }}</p>
+                    <p class="text-xs text-forest-500 italic truncate">{{ aloc.animal.especie.nome_comum }}</p>
+                </div>
+                <div class="text-right shrink-0">
+                    <span class="text-xs px-2 py-0.5 rounded-full {% if aloc.animal.sexo == 'M' %}bg-blue-100 text-blue-700{% elif aloc.animal.sexo == 'F' %}bg-pink-100 text-pink-700{% else %}bg-gray-100 text-gray-600{% endif %}">
+                        {{ aloc.animal.get_sexo_display }}
+                    </span>
+                    <p class="text-xs text-forest-400 mt-1">Desde {{ aloc.data_entrada|date:"d/m/Y" }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+            <p class="text-forest-400 text-sm">Nenhum animal alocado neste recinto</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Espécies Presentes -->
+    <div class="glass-card rounded-2xl p-6 shadow-md animate-fade-in-delay-2">
+        <h3 class="text-lg font-semibold text-forest-900 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+            Espécies Presentes
+        </h3>
+
+        {% if especies_presentes %}
+        <div class="flex flex-wrap gap-2">
+            {% for esp in especies_presentes %}
+            <div class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-forest-50 to-teal-50 border border-forest-100">
+                <p class="text-sm font-medium text-forest-800">{{ esp.nome_comum }}</p>
+                <p class="text-xs text-forest-500 italic">{{ esp.nome_cientifico }}</p>
+                <span class="inline-block mt-1 px-2 py-0.5 text-xs rounded-full
+                    {% if esp.status_conservacao == 'CR' %}bg-red-100 text-red-700
+                    {% elif esp.status_conservacao == 'EN' %}bg-orange-100 text-orange-700
+                    {% elif esp.status_conservacao == 'VU' %}bg-yellow-100 text-yellow-700
+                    {% elif esp.status_conservacao == 'NT' %}bg-lime-100 text-lime-700
+                    {% else %}bg-green-100 text-green-700{% endif %}">
+                    {{ esp.get_status_conservacao_display }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-forest-400 text-sm text-center py-8">Nenhuma espécie registrada</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Histórico de Alocações -->
+<div class="glass-card rounded-2xl p-6 shadow-md animate-fade-in-delay-3">
+    <h3 class="text-lg font-semibold text-forest-900 mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-forest-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Histórico de Alocações
+    </h3>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b border-forest-100">
+                    <th class="text-left py-3 px-4 text-forest-600 font-semibold">Animal</th>
+                    <th class="text-left py-3 px-4 text-forest-600 font-semibold">Espécie</th>
+                    <th class="text-left py-3 px-4 text-forest-600 font-semibold">Entrada</th>
+                    <th class="text-left py-3 px-4 text-forest-600 font-semibold">Saída</th>
+                    <th class="text-left py-3 px-4 text-forest-600 font-semibold">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for aloc in historico_alocacoes %}
+                <tr class="border-b border-forest-50 hover:bg-forest-50/50 transition-colors">
+                    <td class="py-3 px-4 font-medium text-forest-900">{{ aloc.animal.apelido|default:aloc.animal.nro_reg }}</td>
+                    <td class="py-3 px-4 text-forest-700 italic text-xs">{{ aloc.animal.especie.nome_comum }}</td>
+                    <td class="py-3 px-4 text-forest-700">{{ aloc.data_entrada|date:"d/m/Y" }}</td>
+                    <td class="py-3 px-4 text-forest-700">{{ aloc.data_saida|date:"d/m/Y"|default:"—" }}</td>
+                    <td class="py-3 px-4">
+                        {% if aloc.data_saida %}
+                        <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600">Encerrada</span>
+                        {% else %}
+                        <span class="px-2 py-0.5 text-xs rounded-full bg-forest-100 text-forest-700">Ativa</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="py-6 text-center text-forest-400">Nenhum histórico registrado</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

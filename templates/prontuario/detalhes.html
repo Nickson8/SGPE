@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+
+{% block title %}Prontuário - {{ animal.apelido|default:animal.nro_reg }}{% endblock %}
+
+{% block content %}
+<!-- Header com navegação -->
+<div class="mb-6 animate-fade-in">
+    <div class="flex items-center gap-3 mb-2">
+        <a href="{% url 'prontuario_selecao' %}" class="text-forest-600 hover:text-forest-800 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </a>
+        <h1 class="text-3xl font-bold text-forest-950">Prontuário Digital</h1>
+    </div>
+</div>
+
+<!-- Ficha do Animal (Hero Card) -->
+<div class="glass-card rounded-2xl p-6 shadow-lg mb-6 animate-fade-in-delay-1">
+    <div class="flex flex-col md:flex-row items-start gap-6">
+        <div class="w-20 h-20 bg-gradient-to-br from-teal-500 to-forest-700 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shrink-0">
+            {{ animal.apelido|default:animal.nro_reg|truncatechars:2|upper }}
+        </div>
+        <div class="flex-1 min-w-0">
+            <h2 class="text-2xl font-bold text-forest-900">{{ animal.apelido|default:animal.nro_reg }}</h2>
+            <p class="text-teal-700 italic text-sm">{{ animal.especie.nome_cientifico }} — {{ animal.especie.nome_comum }}</p>
+            <div class="flex flex-wrap gap-2 mt-3">
+                <span class="px-3 py-1 text-xs font-medium rounded-full {% if animal.sexo == 'M' %}bg-blue-100 text-blue-700{% elif animal.sexo == 'F' %}bg-pink-100 text-pink-700{% else %}bg-gray-100 text-gray-600{% endif %}">
+                    {{ animal.get_sexo_display }}
+                </span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-forest-100 text-forest-700">
+                    Reg: {{ animal.nro_reg }}
+                </span>
+                {% if animal.nro_gefau %}
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-teal-100 text-teal-700">
+                    GEFAU: {{ animal.nro_gefau }}
+                </span>
+                {% endif %}
+                {% if animal.idade %}
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-700">
+                    {{ animal.idade }}
+                </span>
+                {% endif %}
+                {% if recinto_atual %}
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-700">
+                    📍 {{ recinto_atual.nome }}
+                </span>
+                {% endif %}
+                <span class="px-3 py-1 text-xs font-medium rounded-full
+                    {% if animal.especie.status_conservacao == 'CR' %}bg-red-100 text-red-700
+                    {% elif animal.especie.status_conservacao == 'EN' %}bg-orange-100 text-orange-700
+                    {% elif animal.especie.status_conservacao == 'VU' %}bg-yellow-100 text-yellow-700
+                    {% else %}bg-green-100 text-green-700{% endif %}">
+                    IUCN: {{ animal.especie.get_status_conservacao_display }}
+                </span>
+            </div>
+        </div>
+        <a href="{% url 'prontuario_novo_registro' animal.nro_reg %}"
+           class="shrink-0 bg-gradient-to-r from-teal-600 to-forest-600 text-white px-5 py-2.5 rounded-xl font-medium text-sm hover:shadow-lg hover:from-teal-500 hover:to-forest-500 transition-all duration-300 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Novo Registro
+        </a>
+    </div>
+</div>
+
+<!-- Alertas (Restrições e Riscos) -->
+{% if restricoes or riscos %}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    {% if restricoes %}
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 animate-fade-in-delay-2">
+        <h3 class="font-semibold text-amber-800 mb-3 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+            Restrições Ativas
+        </h3>
+        {% for r in restricoes %}
+        <div class="bg-white/60 rounded-lg p-3 mb-2 last:mb-0">
+            <p class="text-sm text-amber-900">{{ r.restricao }}</p>
+            <p class="text-xs text-amber-600 mt-1">{{ r.data|date:"d/m/Y" }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% if riscos %}
+    <div class="bg-red-50 border border-red-200 rounded-xl p-4 animate-fade-in-delay-2">
+        <h3 class="font-semibold text-red-800 mb-3 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            Riscos Registrados
+        </h3>
+        {% for r in riscos %}
+        <div class="bg-white/60 rounded-lg p-3 mb-2 last:mb-0">
+            <p class="text-sm text-red-900">{{ r.risco }}</p>
+            <p class="text-xs text-red-600 mt-1">{{ r.data|date:"d/m/Y" }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Gráficos de Evolução -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Evolução de Peso -->
+    <div class="glass-card rounded-2xl p-6 shadow-md animate-fade-in-delay-2">
+        <h3 class="text-lg font-semibold text-forest-900 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-forest-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+            Evolução de Peso (kg)
+        </h3>
+        <canvas id="chartPeso"></canvas>
+    </div>
+
+    <!-- Evolução Score Corporal -->
+    <div class="glass-card rounded-2xl p-6 shadow-md animate-fade-in-delay-2">
+        <h3 class="text-lg font-semibold text-forest-900 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Evolução Score Corporal
+        </h3>
+        <canvas id="chartScore"></canvas>
+    </div>
+</div>
+
+<!-- Cronograma de Medicações -->
+{% if medicacoes %}
+<div class="glass-card rounded-2xl p-6 shadow-md mb-6 animate-fade-in-delay-3">
+    <h3 class="text-lg font-semibold text-forest-900 mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+        Cronograma de Medicações
+    </h3>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b border-forest-100">
+                    <th class="text-left py-3 px-4 text-forest-600 font-semibold">Data</th>
+                    <th class="text-left py-3 px-4 text-forest-600 font-semibold">Medicamento</th>
+                    <th class="text-left py-3 px-4 text-forest-600 font-semibold">Dose PV</th>
+                    <th class="text-left py-3 px-4 text-forest-600 font-semibold">Tipo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for med in medicacoes %}
+                <tr class="border-b border-forest-50 hover:bg-forest-50/50 transition-colors">
+                    <td class="py-3 px-4 text-forest-700">{{ med.registro.data|date:"d/m/Y" }}</td>
+                    <td class="py-3 px-4 font-medium text-forest-900">{{ med.medicamento }}</td>
+                    <td class="py-3 px-4 text-forest-700">{{ med.dose_pv }}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 text-xs rounded-full {% if med.registro.tipo_registro == 'clinico' %}bg-teal-100 text-teal-700{% else %}bg-forest-100 text-forest-700{% endif %}">
+                            {{ med.registro.get_tipo_registro_display }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Exames Recentes -->
+{% if exames %}
+<div class="glass-card rounded-2xl p-6 shadow-md mb-6 animate-fade-in-delay-3">
+    <h3 class="text-lg font-semibold text-forest-900 mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-forest-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Exames Recentes
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {% for exame in exames %}
+        <div class="bg-white/50 rounded-xl p-4 border border-forest-100 hover:border-forest-200 transition-colors">
+            <div class="flex items-center justify-between mb-2">
+                <span class="font-medium text-forest-900 text-sm">{{ exame.tipo }}</span>
+                <span class="text-xs text-forest-500">{{ exame.data|date:"d/m/Y" }}</span>
+            </div>
+            <p class="text-sm text-forest-700">{{ exame.resultado }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Histórico de Registros (Timeline) -->
+<div class="glass-card rounded-2xl p-6 shadow-md animate-fade-in-delay-3">
+    <h3 class="text-lg font-semibold text-forest-900 mb-6 flex items-center gap-2">
+        <svg class="w-5 h-5 text-forest-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Histórico de Registros
+    </h3>
+
+    {% if registros %}
+    <div class="relative">
+        <!-- Linha vertical -->
+        <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-forest-200"></div>
+
+        <div class="space-y-6">
+            {% for reg in registros %}
+            <div class="relative pl-12">
+                <!-- Bolinha na timeline -->
+                <div class="absolute left-2.5 top-1 w-3 h-3 rounded-full border-2 border-white shadow-sm
+                    {% if reg.tipo_registro == 'clinico' %}bg-teal-500{% else %}bg-forest-500{% endif %}"></div>
+
+                <div class="bg-white/50 rounded-xl p-4 border border-forest-100 hover:border-forest-200 transition-all">
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                        <span class="px-2 py-0.5 text-xs font-medium rounded-full
+                            {% if reg.tipo_registro == 'clinico' %}bg-teal-100 text-teal-700{% else %}bg-forest-100 text-forest-700{% endif %}">
+                            {{ reg.get_tipo_registro_display }}
+                        </span>
+                        <span class="text-xs text-forest-500">{{ reg.data_hora|date:"d/m/Y H:i" }}</span>
+                        {% if reg.funcionario %}
+                        <span class="text-xs text-forest-500">— {{ reg.funcionario.nome }}</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-sm font-medium text-forest-900 mb-1">{{ reg.ocorrencia }}</p>
+                    {% if reg.detalhamento %}
+                    <p class="text-sm text-forest-700">{{ reg.detalhamento }}</p>
+                    {% endif %}
+                    {% if reg.tratamento %}
+                    <p class="text-xs text-teal-600 mt-2">💊 {{ reg.tratamento }}</p>
+                    {% endif %}
+
+                    <!-- Medicações do registro -->
+                    {% if reg.medicacoes.all %}
+                    <div class="mt-3 flex flex-wrap gap-1">
+                        {% for med in reg.medicacoes.all %}
+                        <span class="px-2 py-0.5 text-xs bg-teal-50 text-teal-700 rounded-full">
+                            {{ med.medicamento }} ({{ med.dose_pv }})
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-12">
+        <svg class="w-16 h-16 text-forest-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <p class="text-forest-400">Nenhum registro encontrado</p>
+        <a href="{% url 'prontuario_novo_registro' animal.nro_reg %}" class="inline-flex items-center gap-1 mt-3 text-sm text-teal-600 hover:text-teal-800 font-medium">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Criar primeiro registro
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const datas = {{ triagem_datas|safe }};
+    const pesos = {{ triagem_pesos|safe }};
+    const scores = {{ triagem_scores|safe }};
+
+    // Formatar datas
+    const labels = datas.map(d => {
+        const dt = new Date(d);
+        return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    });
+
+    // Gráfico de Peso
+    new Chart(document.getElementById('chartPeso'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Peso (kg)',
+                data: pesos,
+                borderColor: '#16a34a',
+                backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#16a34a',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: false, grid: { color: 'rgba(0,0,0,0.05)' } },
+                x: { grid: { display: false }, ticks: { maxRotation: 45 } },
+            },
+        }
+    });
+
+    // Gráfico de Score
+    new Chart(document.getElementById('chartScore'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Score Corporal',
+                data: scores,
+                borderColor: '#0d9488',
+                backgroundColor: 'rgba(13, 148, 136, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#0d9488',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { min: 0, max: 5, grid: { color: 'rgba(0,0,0,0.05)' } },
+                x: { grid: { display: false }, ticks: { maxRotation: 45 } },
+            },
+        }
+    });
+});
+</script>
+{% endblock %}

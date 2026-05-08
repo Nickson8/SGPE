@@ -1,0 +1,140 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SGPE - Sistema de Gestão para Parques Ecológicos. Gerenciamento de fauna, recintos e prontuários veterinários.">
+    <title>{% block title %}SGPE{% endblock %} | Sistema de Gestão para Parques Ecológicos</title>
+    <!-- Tailwind CSS 4 via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        @theme {
+            --color-forest-50: #f0fdf4;
+            --color-forest-100: #dcfce7;
+            --color-forest-200: #bbf7d0;
+            --color-forest-300: #86efac;
+            --color-forest-400: #4ade80;
+            --color-forest-500: #22c55e;
+            --color-forest-600: #16a34a;
+            --color-forest-700: #15803d;
+            --color-forest-800: #166534;
+            --color-forest-900: #14532d;
+            --color-forest-950: #052e16;
+            --color-teal-600: #0d9488;
+            --color-teal-700: #0f766e;
+            --color-teal-800: #115e59;
+            --color-emerald-700: #047857;
+            --color-emerald-800: #065f46;
+            --font-family-sans: 'Inter', system-ui, sans-serif;
+        }
+    </style>
+    <style>
+        * { font-family: 'Inter', system-ui, sans-serif; }
+
+        /* Scrollbar customizada */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #86efac; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4ade80; }
+
+        /* Animação de fade-in */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeInUp 0.5s ease-out forwards; }
+        .animate-fade-in-delay-1 { animation: fadeInUp 0.5s ease-out 0.1s forwards; opacity: 0; }
+        .animate-fade-in-delay-2 { animation: fadeInUp 0.5s ease-out 0.2s forwards; opacity: 0; }
+        .animate-fade-in-delay-3 { animation: fadeInUp 0.5s ease-out 0.3s forwards; opacity: 0; }
+
+        /* Glassmorphism para cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Gradiente de fundo */
+        .bg-forest-gradient {
+            background: linear-gradient(135deg, #052e16 0%, #14532d 30%, #166534 60%, #15803d 100%);
+        }
+
+        .bg-mesh {
+            background-color: #f0fdf4;
+            background-image:
+                radial-gradient(at 20% 80%, rgba(74, 222, 128, 0.15) 0px, transparent 50%),
+                radial-gradient(at 80% 20%, rgba(34, 197, 94, 0.1) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(22, 163, 74, 0.05) 0px, transparent 50%);
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-mesh min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-forest-gradient shadow-xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo + Nome -->
+                <a href="{% url 'home' %}" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 bg-forest-400/20 rounded-xl flex items-center justify-center border border-forest-400/30 group-hover:bg-forest-400/30 transition-all duration-300">
+                        <svg class="w-6 h-6 text-forest-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="text-white font-bold text-lg tracking-tight">SGPE</span>
+                        <span class="text-forest-300 text-xs block -mt-1">Parques Ecológicos</span>
+                    </div>
+                </a>
+
+                <!-- Links de navegação -->
+                <div class="hidden md:flex items-center gap-1">
+                    <a href="{% url 'home' %}" class="text-forest-200 hover:text-white hover:bg-white/10 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200">
+                        Início
+                    </a>
+                    <a href="{% url 'dashboard' %}" class="text-forest-200 hover:text-white hover:bg-white/10 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200">
+                        Dashboard
+                    </a>
+                    <a href="{% url 'prontuario_selecao' %}" class="text-forest-200 hover:text-white hover:bg-white/10 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200">
+                        Prontuário
+                    </a>
+                    <a href="{% url 'recintos_selecao' %}" class="text-forest-200 hover:text-white hover:bg-white/10 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200">
+                        Recintos
+                    </a>
+                </div>
+
+                <!-- Avatar do usuário -->
+                <div class="flex items-center gap-3">
+                    <div class="hidden sm:block text-right">
+                        <p class="text-white text-sm font-medium">{{ user_name }}</p>
+                        <p class="text-forest-300 text-xs">{{ user_role }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-gradient-to-br from-forest-400 to-teal-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg ring-2 ring-forest-400/30 cursor-pointer hover:ring-forest-300/50 transition-all duration-300">
+                        {{ user_initials }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo principal -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-6 text-center text-forest-800/40 text-xs">
+        <p>SGPE &copy; 2026 — Sistema de Gestão para Parques Ecológicos</p>
+    </footer>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
