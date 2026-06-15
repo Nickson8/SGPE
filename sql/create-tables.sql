@@ -1,0 +1,157 @@
+CREATE TABLE ANIMAL(
+    NroReg INTEGER NOT NULL,
+    Especie VARCHAR2(30) NOT NULL,
+    DataNasc DATE NOT NULL,
+    Marcacao1 VARCHAR2(30),
+    Marcacao2 VARCHAR2(30),
+    Apelido VARCHAR2(30),
+    -- 'M': Macho, 'F': Fêmea e 'I': Indeterminado.
+    Sexo CHAR(1),
+    -- 'S': Pertence ao plantel, 'N': Não pertence.
+    Plantel VARCHAR2(30) NOT NULL,
+    NroGEFAU VARCHAR2(30),
+    NroLivro INTEGER NOT NULL,
+
+    CONSTRAINT PK_ANIMAL PRIMARY KEY(NroReg),
+    CONSTRAINT UK1_ANIMAL_NROGEFAU UNIQUE(NroGEFAU),
+    CONSTRAINT UK2_ANIMAL_NROLIVRO UNIQUE(NroLivro),
+    CONSTRAINT CK_ANIMAL_SEXO CHECK(Sexo IN ('M', 'F', 'I')),
+    CONSTRAINT CK_ANIMAL_PLANTEL CHECK(Plantel IN ('S', 'N')),
+    CONSTRAINT FK_ANIMAL_ESPECIE FOREIGN KEY(Especie)
+        REFERENCES ESPECIE(NomeCientifico)
+        -- Oracle já executa o ON DELETE RESTRICT
+        -- Utilizar ON UPDATE CASCADE com Triggers
+);
+
+CREATE TABLE ESPECIE(
+    NomeCientifico VARCHAR2(30) NOT NULL,
+    NomeComum VARCHAR2(30),
+    GrupoTaxonomico VARCHAR2(30),
+    -- 'S': Existe plano, e 'N': Não existe.
+    PlanaDeManejo CHAR(1),
+    Quantidade INTEGER,
+
+    CONSTRAINT PK_ESPECIE PRIMARY KEY(NomeCientifico),
+    CONSTRAINT CK_ESPECIE_PLANODEMANEJO CHECK(PlanaDeManejo IN ('S', 'N'))
+);
+
+CREATE TABLE TRIAGEM(
+    Animal INTEGER NOT NULL,
+    DataTriagem DATE NOT NULL,
+    PesoAoChegar FLOAT,
+    ScoreCorporal FLOAT,
+    GravidadeVeterinaria VARCHAR2(30),
+    Observacoes VARCHAR2(50),
+    IdadeNaTriagem INTEGER,
+
+    CONSTRAINT PK_TRIAGEM PRIMARY KEY(Animal, DataTriagem),
+    CONSTRAINT FK_TRIAGEM_ANIMAL FOREIGN KEY(Animal)
+        REFERENCES ANIMAL(NroReg)
+        ON DELETE CASCADE,
+        -- Utilizar ON UPDATE CASCADE com Triggers
+);
+
+CREATE TABLE RESTRICOES(
+    Animal INTEGER NOT NULL,
+    DataTriagem INTEGER NOT NULL,
+    Restricao VARCHAR2(30) NOT NULL,
+
+    CONSTRAINT PK_RESTRICOES PRIMARY KEY(Animal, DataTriagem, Restricao),
+    CONSTRAINT FK_RESTRICOES_TRIAGEM FOREIGN KEY(Animal, DataTriagem)
+        REFERENCES TRIAGEM(Animal, DataTriagem)
+        ON DELETE CASCADE,
+        -- Utilizar ON UPDATE CASCADE com Triggers
+);
+
+CREATE TABLE RISCO(
+    Animal INTEGER NOT NULL,
+    DataTriagem DATE NOT NULL,
+    Risco VARCHAR2(30) NOT NULL,
+
+    CONSTRAINT PK_RISCO PRIMARY KEY(Animal, DataTriagem, Risco),
+    CONSTRAINT FK_RISCO_TRIAGEM FOREIGN KEY(Animal, DataTriagem)
+        REFERENCES TRIAGEM(Animal, DataTriagem)
+        ON DELETE CASCADE,
+        -- Utilizar ON UPDATE CASCADE com Triggers
+);
+
+CREATE TABLE FUNCIONARIO(
+    -- Armazena-se apenas os numeros
+    CPF CHAR(11) NOT NULL,
+    Nome VARCHAR2(30),
+    Telefone VARCHAR2(20),
+    -- Tamanho 20 supondo possivel novas funcoes.
+    Funcao VARCHAR(20) DEFAULT 'VISITANTE',
+
+    CONSTRAINT PK_FUNCIONARIO PRIMARY KEY(CPF),
+    CONSTRAINT CK_CPF CHECK(LENGTH(CPF) = 11),
+    CONSTRAINT CK_TELEFONE CHECK(LENGTH(Telefone) >= 8),
+    CONSTRAINT CK_FUNCAO CHECK
+        (Funcao IN ('ADMINISTRADOR', 'VETERINARIO', 'BIOLOGO', 'VISITANTE'))
+);
+
+CREATE TABLE REGISTROBIOLOGICO(
+    Animal INTEGER NOT NULL,
+    DataTriagem DATE NOT NULL,
+    DataHoraRegistro DATE NOT NULL,
+    Ocorrencia VARCHAR2(50),
+    Detalhamento VARCHAR2(50),
+    AnexoLaudoSaude BLOB,
+    Funcionario CHAR(11) NOT NULL,
+
+    CONSTRAINT PK_REGISTROBIOLOGICO PRIMARY KEY(Animal, DataTriagem, DataHoraRegistro),
+    CONSTRAINT FK_REGISTROBIOLOGICO_TRIAGEM FOREIGN KEY(Animal, DataTriagem)
+        REFERENCES TRIAGEM(Animal, DataTriagem)
+        ON DELETE CASCADE
+        -- Utilizar ON UPDATE CASCADE com Triggers
+    CONSTRAINT FK_REGISTROBIOLOGICO_FUNCIONARIO FOREIGN KEY(Funcionario)
+        REFERENCES FUNCIONARIO(CPF)
+        -- O que fazer ao apagar os dados dos funcionários?
+);
+
+CREATE TABLE REGISTROCLINICO(
+    ID INTEGER NOT NULL,
+    Animal INTEGER NOT NULL,
+    DataTriagem DATE NOT NULL,
+    DataHoraRegistro DATE NOT NULL,
+    Ocorrencia VARCHAR2(50) NOT NULL,
+    Tratamento VARCHAR2(50),
+    Funcionario CHAR(11) NOT NULL,
+
+    CONSTRAINT PK_REGISTROCLINOCO PRIMARY KEY(ID),
+    CONSTRAINT UK_REGISTROCLINICO UNIQUE(Animal, DataTriagem, DataHoraRegistro),
+    CONSTRAINT FK_REGISTROCLINICO_TRIAGEM FOREIGN KEY(Animal, DataTriagem)
+        REFERENCES TRIAGEM(Animal, DataTriagem)
+        ON DELETE CASCADE
+        -- Utilizar ON UPDATE CASCADE com Triggers
+    CONSTRAINT FK_REGISTROCLINICO_FUNCIONARIO FOREIGN KEY(Funcionario)
+        REFERENCES FUNCIONARIO(CPF)
+        -- O que fazer ao apagar os dados dos funcionários?
+);
+
+CREATE TABLE MEDICAMENTOADMINISTRADO(
+    ID INTEGER NOT NULL,
+    Medicamento VARCHAR2(30) NOT NULL,
+    DosePV FLOAT,
+
+    CONSTRAINT PK_MEDICAMENTOADMINISTRADO PRIMARY KEY(ID, Medicamento),
+    CONSTRAINT FK_MEDICAMENTOADMINISTRADO_REGISTROCLINICO FOREIGN KEY(ID)
+        REFERENCES REGISTROCLINICO(ID)
+        ON DELETE CASCADE,
+        -- Utilizar ON UPDATE CASCADE com Triggers
+);
+
+CREATE TABLE EXAMES(
+    ID INTEGER NOT NULL,
+    DataExame DATE NOT NULL,
+    TipoExame VARCHAR2(30),
+    Resultados VARCHAR2(100),
+    Observacoes VARCHAR2(50),
+
+    CONSTRAINT PK_MEDICAMENTOADMINISTRADO PRIMARY KEY(ID, DataExame, TipoExame),
+    CONSTRAINT FK_MEDICAMENTOADMINISTRADO_REGISTROCLINICO FOREIGN KEY(ID)
+        REFERENCES REGISTROCLINICO(ID)
+        ON DELETE CASCADE,
+        -- Utilizar ON UPDATE CASCADE com Triggers
+);
+
