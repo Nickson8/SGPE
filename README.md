@@ -160,7 +160,7 @@ O esquema relacional é o coração acadêmico do projeto. Os scripts originais 
 - [ ] Autenticação e controle de acesso (login, perfis)
 - [ ] Operações de escrita (cadastro/edição de animais, recintos e registros)
 - [ ] Módulos de cardápio, rotinas, genealogia e documentos (já modelados no banco)
-- [ ] Relatórios gerenciais em PDF
+- [ ] Modelgem das consultas programadas em sql/ para a interface
 - [ ] Deploy para produção
 
 ---
