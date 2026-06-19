@@ -1,23 +1,23 @@
--- 1. Tabelas Folhas (Não possuem nenhuma outra tabela dependendo delas)
-DROP TABLE PROLE;
-DROP TABLE EXAMES;
-DROP TABLE MEDICAMENTOADMINISTRADO;
-DROP TABLE RESTRICOES;
-DROP TABLE RISCO;
-DROP TABLE REGISTROBIOLOGICO;
-DROP TABLE REGISTROROTINA;
-DROP TABLE ITEMCARDAPIO;
-DROP TABLE DOCUMENTO;
-DROP TABLE ALOCACAO;
+-- 1. Tabelas folha (nenhuma outra tabela depende delas)
+DROP TABLE IF EXISTS prole                  CASCADE;
+DROP TABLE IF EXISTS exames                 CASCADE;
+DROP TABLE IF EXISTS medicamento_administrado CASCADE;
+DROP TABLE IF EXISTS restricoes             CASCADE;
+DROP TABLE IF EXISTS risco                  CASCADE;
+DROP TABLE IF EXISTS registro_biologico     CASCADE;
+DROP TABLE IF EXISTS registro_rotina        CASCADE;
+DROP TABLE IF EXISTS item_cardapio          CASCADE;
+DROP TABLE IF EXISTS documento              CASCADE;
+DROP TABLE IF EXISTS alocacao               CASCADE;
 
--- 2. Tabelas Intermediárias (Dependem das tabelas raízes, mas são pais das tabelas folhas)
-DROP TABLE CASAL;
-DROP TABLE REGISTROCLINICO;
-DROP TABLE DESCRICAOROTINA;
-DROP TABLE TRIAGEM;
+-- 2. Tabelas intermediárias (dependem das raízes, mas são pai das folhas)
+DROP TABLE IF EXISTS casal                  CASCADE;
+DROP TABLE IF EXISTS registro_clinico       CASCADE;
+DROP TABLE IF EXISTS descricao_rotina       CASCADE;
+DROP TABLE IF EXISTS triagem                CASCADE;
 
--- 3. Tabelas Raízes/Base (Não dependem de ninguém, foram as primeiras a serem criadas)
-DROP TABLE ANIMAL;
-DROP TABLE ESPECIE;
-DROP TABLE RECINTO;
-DROP TABLE FUNCIONARIO;
+-- 3. Tabelas raízes (sem dependências externas)
+DROP TABLE IF EXISTS animal                 CASCADE;
+DROP TABLE IF EXISTS especie                CASCADE;
+DROP TABLE IF EXISTS recinto                CASCADE;
+DROP TABLE IF EXISTS funcionario            CASCADE;

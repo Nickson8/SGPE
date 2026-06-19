@@ -1,96 +1,158 @@
--- SCRIPT DE POPULAÇÃO INICIAL DO BANCO
+-- Tabela: especie
+INSERT INTO especie (nome_cientifico, nome_comum, grupo_taxonomico, plano_de_manejo, quantidade) VALUES
+    ('Panthera onca',            'Onça-pintada',     'Mamíferos', 'S', 5),
+    ('Myrmecophaga tridactyla',  'Tamanduá-bandeira', 'Mamíferos', 'S', 3);
 
--- Tabela: Espécie
-INSERT INTO Especie (NomeCientifico, NomeComum, GrupoTaxonomico, PlanoDeManejo, Quantidade) VALUES
-('Panthera onca', 'Onça-pintada', 'Mamíferos', 'Plano de Manejo e Conservação de Grandes Felinos', 5),
-('Myrmecophaga tridactyla', 'Tamanduá-bandeira', 'Mamíferos', 'Plano de Conservação de Xenartros', 3);
+-- Tabela: recinto
+INSERT INTO recinto (recinto_gefau, nome, capacidade_max, qnt_animais, qnt_especies) VALUES
+    ('REC-101', 'Recinto das Onças - Setor A',  6, 4, 1),
+    ('REC-202', 'Savana e Cerrado - Setor B',  12, 3, 2);
 
--- Tabela: Recinto
-INSERT INTO Recinto (RecintoGEFAU, Nome, CapMaxima, QntAnimais, QntEspecies) VALUES
-('REC-101', 'Recinto das Onças - Setor A', 6, 4, 1),
-('REC-202', 'Savana e Cerrado - Setor B', 12, 3, 2);
+-- Tabela: funcionario
+INSERT INTO funcionario (cpf, nome, telefone, funcao) VALUES
+    ('12345678901', 'Dr. Carlos Silva', '16999999991', 'VETERINARIO'),
+    ('98765432100', 'Dra. Ana Souza',   '16999999992', 'BIOLOGO');
 
--- Tabela: Funcionário
-INSERT INTO Funcionario (CPF, Nome, Telefone, Função) VALUES
-('12345678901', 'Dr. Carlos Silva', '16999999991', 'Veterinário'),
-('98765432100', 'Dra. Ana Souza', '16999999992', 'Bióloga');
+-- Tabela: animal
+INSERT INTO animal (nro_reg, especie, data_nasc, marcacao_1, marcacao_2, apelido, sexo, plantel, nro_gefau, nro_livro) VALUES
+    (1, 'Panthera onca',           '2020-05-12', 'CHIP-9810', 'BRINCO-01', 'Juma',   'F', 'S', 'GEFAU-A10', 1),
+    (2, 'Panthera onca',           '2019-08-20', 'CHIP-9820', 'BRINCO-02', 'Tufão',  'M', 'S', 'GEFAU-A11', 2),
+    (3, 'Myrmecophaga tridactyla', '2021-03-15', 'CHIP-1110', NULL,        'Dengo',  'M', 'S', 'GEFAU-B01', 3),
+    (4, 'Panthera onca',           '2025-01-10', 'CHIP-9830', NULL,        'Pipoca', 'F', 'N', 'GEFAU-A12', 4),
+    (5, 'Panthera onca',           '2025-01-10', 'CHIP-9840', NULL,        'Fumaça', 'M', 'N', 'GEFAU-A13', 5),
+    (6, 'Myrmecophaga tridactyla', '2018-02-10', 'CHIP-1120', NULL,        'Maya',   'F', 'S', 'GEFAU-B02', 6),
+    (7, 'Myrmecophaga tridactyla', '2017-11-25', 'CHIP-1130', NULL,        'Bore',   'M', 'S', 'GEFAU-B03', 7);
 
--- Tabela: Animal
-INSERT INTO Animal (NroReg, Espécie, DataNasc, Marcação_1, Marcação_2, Apelido, Sexo, Plantel, NroGEFAU, NroLivro) VALUES
-(1, 'Panthera onca', '2020-05-12', 'CHIP-9810', 'BRINCO-01', 'Juma', 'F', 'Plantel Principal', 'GEFAU-A10', 'Livro-01'),
-(2, 'Panthera onca', '2019-08-20', 'CHIP-9820', 'BRINCO-02', 'Tufão', 'M', 'Plantel Principal', 'GEFAU-A11', 'Livro-01'),
-(3, 'Myrmecophaga tridactyla', '2021-03-15', 'CHIP-1110', NULL, 'Dengo', 'M', 'Plantel Principal', 'GEFAU-B01', 'Livro-02'),
-(4, 'Panthera onca', '2025-01-10', 'CHIP-9830', NULL, 'Pipoca', 'F', 'Filhotes', 'GEFAU-A12', 'Livro-01'),
-(5, 'Panthera onca', '2025-01-10', 'CHIP-9840', NULL, 'Fumaça', 'M', 'Filhotes', 'GEFAU-A13', 'Livro-01'),
-(6, 'Myrmecophaga tridactyla', '2018-02-10', 'CHIP-1120', NULL, 'Maya', 'F', 'Plantel Principal', 'GEFAU-B02', 'Livro-02'),
-(7, 'Myrmecophaga tridactyla', '2017-11-25', 'CHIP-1130', NULL, 'Bore', 'M', 'Plantel Principal', 'GEFAU-B03', 'Livro-02');
+-- Tabela: casal
+INSERT INTO casal (animal_1, animal_2) VALUES
+    (2, 1),  -- Tufão e Juma
+    (7, 6);  -- Bore e Maya
 
--- Tabela: Prole
-INSERT INTO Prole (Pai, Mãe, Prole) VALUES
-(2, 1, 4), -- Pai: Tufão (2), Mãe: Juma (1) -> Filho: Pipoca (4)
-(2, 1, 5); -- Pai: Tufão (2), Mãe: Juma (1) -> Filho: Fumaça (5)
+-- Tabela: prole
+INSERT INTO prole (pai, mae, prole) VALUES
+    (2, 1, 4),  -- Pai: Tufão (2), Mãe: Juma (1) -> Pipoca (4)
+    (2, 1, 5);  -- Pai: Tufão (2), Mãe: Juma (1) -> Fumaça (5)
 
--- Tabela: Casal
-INSERT INTO Casal (Animal_1, Animal_2) VALUES
-(2, 1), -- Tufão e Juma
-(7, 6); -- Bore e Maya
+-- Tabela: item_cardapio
+INSERT INTO item_cardapio (animal, alimento, quantidade, observacoes, frequencia) VALUES
+    (1, 'Carne Bovina com Osso',         5.500, 'Oferecer preferencialmente no final da tarde',                    'Diário'),
+    (3, 'Suplemento de Insetos Batido',  2.000, 'Adicionar complexo vitamínico conforme instrução da bióloga',    'Duas vezes ao dia');
 
--- Tabela: ItemCardápio
-INSERT INTO ItemCardapio (Animal, Alimento, QntPorção, Observações, Frequência) VALUES
-(1, 'Carne Bovina com Osso', 5.5, 'Oferecer preferencialmente no final da tarde', 'Diário'),
-(3, 'Suplemento de Insetos Batido', 2.0, 'Adicionar complexo vitamínico conforme instrução da bióloga', 'Duas vezes ao dia');
+-- Tabela: descricao_rotina
+INSERT INTO descricao_rotina (animal, tipo_rotina, objetivo, metodologia, ferramentas, frequencia, tipo, comandos) VALUES
+    (1, 'Enriquecimento',
+        'Estimular comportamento cognitivo e de caça',
+        'Esconder porções de carne dentro de caixas de papelão suspensas',
+        'Caixas de papelão, cordas de sisal',
+        'Semanal',
+        'Cognitivo/Alimentar',
+        NULL),
+    (1, 'Condicionamento',
+        'Reforçar resposta a comandos básicos de manejo',
+        'Associar sons de apito a recompensas alimentares em área controlada',
+        'Apito, protetor de barreira, luvas de couro',
+        'Três vezes por semana',
+        NULL,
+        'Apito-curto: aproximar; Apito-longo: recuar'),
+    (3, 'Enriquecimento',
+        'Exercício físico e desgaste natural das garras',
+        'Conduzir o animal em área gramada externa controlada',
+        'Guia peitoral adaptada',
+        'Três vezes por semana',
+        'Físico',
+        NULL),
+    (3, 'Condicionamento',
+        'Habituar o animal à presença dos tratadores e ao peitoral',
+        'Aproximação gradual com reforço positivo usando alimento',
+        'Luvas de proteção, alimento palatável',
+        'Diário',
+        NULL,
+        'Mão-aberta: parar; Dois-dedos: sentar');
 
--- Tabela: DescriçãoRotina
-INSERT INTO DescricaoRotina (Animal, TipoRotina, Objetivo, Metodologia, Ferramentas, Tipo, Comentários, Frequência) VALUES
-(1, 'Enriquecimento Ambiental', 'Estimular comportamento cognitivo e de caça', 'Esconder porções de carne dentro de caixas de papelão suspensas', 'Caixas de papelão, cordas de sisal', 'Cognitivo/Alimentar', 'Animal apresenta excelente engajamento', 'Semanal'),
-(3, 'Caminhada Monitorada', 'Exercício físico e desgaste natural das garras', 'Conduzir o animal em área gramada externa controlada', 'Guia peitoral adaptada', 'Físico', 'Realizar somente em horários de temperatura amena', '3 vezes por semana');
+-- Tabela: alocacao
+INSERT INTO alocacao (animal, recinto, data_entrada, data_saida, motivo_saida) VALUES
+    (1, 'REC-101', '2021-01-15', NULL, NULL),
+    (2, 'REC-101', '2020-03-10', NULL, NULL),
+    (3, 'REC-202', '2022-06-10', NULL, NULL),
+    (6, 'REC-202', '2019-05-20', NULL, NULL),
+    (7, 'REC-202', '2018-04-01', NULL, NULL);
 
--- Tabela: Alocação
-INSERT INTO Alocacao (Animal, Recinto, DataEntrada, DataSaída, MotivoSaída) VALUES
-(1, 'REC-101', '2021-01-15', NULL, NULL),
-(3, 'REC-202', '2022-06-10', NULL, NULL);
+-- Tabela: documento
+-- anexo: BYTEA — usamos '\x00' como placeholder (arquivo binário)
+INSERT INTO documento (tipo_documento, nro_documento, animal, anexo, data_cadastro, observacao, tipo_migracao, destino, origem) VALUES
+    ('Termo de Transferência', 'DOC-9921-A', 1,
+        '\x00'::BYTEA, '2021-01-10',
+        'Cedida pelo Zoológico de São Paulo',
+        'Entrada', NULL, 'Zoológico de São Paulo'),
+    ('Laudo de Nascimento',    'DOC-1122-B', 3,
+        '\x00'::BYTEA, '2021-03-15',
+        'Nascido em cativeiro autorizado',
+        'Entrada', NULL, 'Maternidade Veterinária BioParque');
 
--- Tabela: Documento
-INSERT INTO Documento (Animal, TipoDocumento, NroDocumento, Anexo, Data, Observação, TipoMigração, Destino, Origem) VALUES
-(1, 'Termo de Transferência', 'DOC-9921-A', 'termo_juma.pdf', '2021-01-10', 'Cedida pelo Zoológico de São Paulo', 'Entrada', NULL, 'Zoológico de São Paulo'),
-(3, 'Laudo de Nascimento', 'DOC-1122-B', 'laudo_nasc_dengo.pdf', '2021-03-15', 'Nascido em cativeiro autorizado', 'Entrada', NULL, 'Maternidade Veterinária BioParque');
+-- Tabela: triagem
+INSERT INTO triagem (animal, data_triagem, peso_ao_chegar, score_corporal, gravidade_veterinaria, observacoes, idade_na_triagem) VALUES
+    (1, '2026-06-01', 85.400, 4, 'Normal', 'Avaliação periódica semestral',                       6),
+    (3, '2026-06-02', 38.200, 2, 'Alerta', 'Triagem realizada após relato de leve apatia alimentar', 5);
 
--- Tabela: Triagem
-INSERT INTO Triagem (Animal, Data, PesoAoChegar, ScoreCorporal, GravidadeVeterinária, Observações, IdadeNaTriagem) VALUES
-(1, '2026-06-01', 85.4, 'Ideal', 'Normal', 'Avaliação periódica semestral', 6),
-(3, '2026-06-02', 38.2, 'Abaixo do Peso', 'Alerta', 'Triagem realizada após relato de leve apatia alimentar', 5);
+-- Tabela: restricoes
+INSERT INTO restricoes (animal, data_triagem, restricao) VALUES
+    (1, '2026-06-01', 'Nenhuma restrição identificada'),
+    (3, '2026-06-02', 'Evitar itens rígidos por 48h — desgaste na dentição');
 
--- Tabela: RegistroRotina
-INSERT INTO RegistroRotina (Animal, TipoRotina, DataHorario, Observações, DiasSemanal) VALUES
-(1, 'Enriquecimento Ambiental', '2026-06-15 10:00:00', 'Interagiu com o estímulo por 25 minutos até acessar o alimento.', 'Segunda-feira'),
-(3, 'Caminhada Monitorada', '2026-06-16 08:30:00', 'Apresentou bom ritmo e explorou ativamente os troncos caídos.', 'Terça-feira');
+-- Tabela: risco
+INSERT INTO risco (animal, data_triagem, risco) VALUES
+    (1, '2026-06-01', 'Baixo — habituado a contenção química'),
+    (3, '2026-06-02', 'Médio — risco de ferimentos por garras na contenção física');
 
--- Tabela: Restrições
-INSERT INTO Restricoes (Animal, Data, Restrição) VALUES
-(1, '2026-06-01', 'Nenhuma restrição alimentar ou clínica de manejo identificada.'),
-(3, '2026-06-02', 'Evitar oferta de itens rígidos por 48 horas devido a desgaste na dentição.');
+-- Tabela: registro_biologico
+INSERT INTO registro_biologico (animal, data_triagem, data_hora_registro, ocorrencia, detalhamento, anexo_laudo_saude, funcionario) VALUES
+    (1, '2026-06-01', '2026-06-01 11:00:00',
+        'Coleta de Sangue de Rotina',
+        'Coletado sangue da veia cefálica para hemograma completo.',
+        NULL,
+        '98765432100'),
+    (3, '2026-06-02', '2026-06-02 09:15:00',
+        'Coleta de Material Fecal',
+        'Análise parasitológica coprológica solicitada.',
+        NULL,
+        '98765432100');
 
--- Tabela: Risco
-INSERT INTO Risco (Animal, Data, Risco) VALUES
-(1, '2026-06-01', 'Baixo - animal habituado aos procedimentos sob contenção química.'),
-(3, '2026-06-02', 'Médio - risco de ferimentos por garras durante a contenção física.');
+-- Tabela: registro_clinico
+INSERT INTO registro_clinico (id, animal, data_triagem, data_hora_registro, ocorrencia, tratamento, funcionario) VALUES
+    (101, 1, '2026-06-01', '2026-06-01 11:30:00',
+        'Vacinação Anual',
+        'Aplicação de reforço vacinal tríplice felina.',
+        '12345678901'),
+    (102, 3, '2026-06-02', '2026-06-02 10:00:00',
+        'Tratamento de Endoparasitas',
+        'Administração de vermífugo oral de amplo espectro.',
+        '12345678901');
 
--- Tabela: RegistroBiológico
-INSERT INTO RegistroBiologico (Animal, DataTriagem, DataHoraRegistro, Ocorrência, Detalhamento, AnexoLaudoSaúde, Funcionário) VALUES
-(1, '2026-06-01', '2026-06-01 11:00:00', 'Coleta de Sangue de Rotina', 'Coletado sangue da veia cefálica para hemograma completo.', 'laudo_hemograma_juma.pdf', '98765432100'),
-(3, '2026-06-02', '2026-06-02 09:15:00', 'Coleta de Material Fecal', 'Análise parasitológica coprológica solicitada.', 'laudo_copro_dengo.pdf', '98765432100');
+-- Tabela: medicamento_administrado
+INSERT INTO medicamento_administrado (id, medicamento, dose_pv) VALUES
+    (101, 'Vacina Tríplice Felina Nobivac',    1.000),
+    (102, 'Vermífugo Praziquantel/Pirantel',   0.100);
 
--- Tabela: RegistroClínico
-INSERT INTO RegistroClinico (ID, Animal, DataTriagem, DataHoraRegistro, Ocorrência, Tratamento, Funcionário) VALUES
-(101, 1, '2026-06-01', '2026-06-01 11:30:00', 'Vacinação Anual', 'Aplicação de reforço vacinal tríplice felina.', '12345678901'),
-(102, 3, '2026-06-02', '2026-06-02 10:00:00', 'Tratamento de Endoparasitas', 'Administração de vermífugo oral de amplo espectro.', '12345678901');
+-- Tabela: exames
+INSERT INTO exames (id, data_exame, tipo_exame, resultados, observacoes) VALUES
+    (101, '2026-06-01', 'Sorologia Preventiva',
+        'Negativo para FIV/FeLV',
+        'Procedimento preventivo padrão'),
+    (102, '2026-06-05', 'Coprológico de Controle',
+        'Ausência de ovos ou oocistos',
+        'Exame pós-tratamento para certificar eficácia');
 
--- Tabela: MedicamentoAdministrado
-INSERT INTO MedicamentoAdministrado (ID, Medicamento, DosePV) VALUES
-(101, 'Vacina Tríplice Felina Nobivac', '1.0 mL dose única SC'),
-(102, 'Vermífugo Praziquantel/Pirantel', '1 comprimido para cada 10kg de PV');
-
--- Tabela: Exames
-INSERT INTO Exames (ID, Data, Tipo, Resultado, Observação) VALUES
-(101, '2026-06-01', 'Sorologia Preventiva', 'Negativo para FIV/FeLV', 'Procedimento preventivo padrão'),
-(102, '2026-06-05', 'Coprológico de Controle', 'Ausência de ovos ou oocistos', 'Exame pós-tratamento realizado para certificar eficácia');
+-- Tabela: registro_rotina
+INSERT INTO registro_rotina (animal, tipo_rotina, data_horario, observacoes, dias_semana) VALUES
+    (1, 'Enriquecimento', '2026-06-15 10:00:00',
+        'Interagiu com o estímulo por 25 min até acessar o alimento.',
+        '0100000'),  -- Segunda-feira
+    (1, 'Condicionamento', '2026-06-17 09:00:00',
+        'Respondeu corretamente ao apito em 3 de 4 tentativas.',
+        '0010000'),  -- Terça-feira
+    (3, 'Enriquecimento', '2026-06-16 08:30:00',
+        'Explorou ativamente os troncos caídos durante a caminhada.',
+        '0100000'),  -- Segunda-feira
+    (3, 'Condicionamento', '2026-06-18 07:45:00',
+        'Aceitou peitoral sem resistência pela primeira vez.',
+        '0010000');  -- Quarta-feira
