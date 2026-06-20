@@ -1,10 +1,10 @@
-from sqlalchemy import func, select
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.animais.models import Animal
-from app.especies.models import Especie
-from app.recintos.models import Alocacao, Recinto
 from app.recintos.services import percentual_ocupacao, status_ocupacao
+
+# Todas as operações usam SQL explícito (text()), conforme exigido pelo projeto
+# (OBS 3). Os nomes de tabela/coluna seguem init-scripts/01-create-tables.sql.
 
 SEXO_LABELS = {"M": "Macho", "F": "Fêmea", "I": "Indeterminado"}
 PLANO_LABELS = {"S": "Com plano de manejo", "N": "Sem plano de manejo"}
@@ -12,19 +12,30 @@ ESPECIES_AMEACADAS_NOTA = "Plano de manejo = 'S'"
 
 
 async def get_dashboard(db: AsyncSession) -> dict:
-    total_animais = (await db.execute(select(func.count()).select_from(Animal))).scalar_one()
-    total_especies = (await db.execute(select(func.count()).select_from(Especie))).scalar_one()
+    total_animais = (
+        await db.execute(text("SELECT COUNT(*) FROM animal"))
+    ).scalar_one()
+    total_especies = (
+        await db.execute(text("SELECT COUNT(*) FROM especie"))
+    ).scalar_one()
 
-    recintos = (await db.execute(select(Recinto))).scalars().all()
+    recintos = (
+        await db.execute(
+            text(
+                "SELECT recinto_gefau, nome, capacidade_max, qnt_animais, "
+                "qnt_especies FROM recinto"
+            )
+        )
+    ).mappings().all()
     recintos_alerta = sum(
         1
         for r in recintos
-        if percentual_ocupacao(r.qnt_animais, r.capacidade_max) >= 75
+        if percentual_ocupacao(r["qnt_animais"], r["capacidade_max"]) >= 75
     )
 
     especies_com_plano = (
         await db.execute(
-            select(func.count()).select_from(Especie).where(Especie.plano_manejo == "S")
+            text("SELECT COUNT(*) FROM especie WHERE plano_de_manejo = 'S'")
         )
     ).scalar_one()
     pct_com_plano = (
@@ -34,50 +45,68 @@ async def get_dashboard(db: AsyncSession) -> dict:
     # Distribuição por grupo taxonômico (soma das quantidades das espécies).
     grupo_rows = (
         await db.execute(
-            select(Especie.grupo_taxonomico, func.coalesce(func.sum(Especie.quantidade), 0))
-            .group_by(Especie.grupo_taxonomico)
-            .order_by(func.sum(Especie.quantidade).desc())
+            text(
+                "SELECT grupo_taxonomico, COALESCE(SUM(quantidade), 0) AS total "
+                "FROM especie "
+                "GROUP BY grupo_taxonomico "
+                "ORDER BY SUM(quantidade) DESC"
+            )
         )
-    ).all()
+    ).mappings().all()
     grupo_taxonomico = [
-        {"label": grupo or "—", "count": int(total)} for grupo, total in grupo_rows
+        {"label": r["grupo_taxonomico"] or "—", "count": int(r["total"])}
+        for r in grupo_rows
     ]
 
     # Distribuição por sexo (contagem de animais).
     sexo_rows = (
         await db.execute(
-            select(Animal.sexo, func.count()).group_by(Animal.sexo).order_by(Animal.sexo)
+            text(
+                "SELECT sexo, COUNT(*) AS total FROM animal "
+                "GROUP BY sexo ORDER BY sexo"
+            )
         )
-    ).all()
+    ).mappings().all()
     sexo = [
-        {"label": SEXO_LABELS.get((s or "").strip(), s or "—"), "count": c}
-        for s, c in sexo_rows
+        {
+            "label": SEXO_LABELS.get((r["sexo"] or "").strip(), r["sexo"] or "—"),
+            "count": r["total"],
+        }
+        for r in sexo_rows
     ]
 
     # Distribuição por plano de manejo (S/N).
     plano_rows = (
         await db.execute(
-            select(Especie.plano_manejo, func.count())
-            .group_by(Especie.plano_manejo)
-            .order_by(Especie.plano_manejo)
+            text(
+                "SELECT plano_de_manejo, COUNT(*) AS total FROM especie "
+                "GROUP BY plano_de_manejo ORDER BY plano_de_manejo"
+            )
         )
-    ).all()
+    ).mappings().all()
     plano_manejo = [
-        {"label": PLANO_LABELS.get((p or "").strip(), p or "—"), "count": c}
-        for p, c in plano_rows
+        {
+            "label": PLANO_LABELS.get(
+                (r["plano_de_manejo"] or "").strip(), r["plano_de_manejo"] or "—"
+            ),
+            "count": r["total"],
+        }
+        for r in plano_rows
     ]
 
     # Capacidade dos recintos (ordenado por ocupação desc).
     recintos_capacidade = sorted(
         [
             {
-                "nome": r.nome,
-                "gefau": r.recinto_gefau,
-                "ocupacao": r.qnt_animais,
-                "capacidade": r.capacidade_max,
-                "percentual": percentual_ocupacao(r.qnt_animais, r.capacidade_max),
+                "nome": r["nome"],
+                "gefau": r["recinto_gefau"],
+                "ocupacao": r["qnt_animais"],
+                "capacidade": r["capacidade_max"],
+                "percentual": percentual_ocupacao(
+                    r["qnt_animais"], r["capacidade_max"]
+                ),
                 "status": status_ocupacao(
-                    percentual_ocupacao(r.qnt_animais, r.capacidade_max)
+                    percentual_ocupacao(r["qnt_animais"], r["capacidade_max"])
                 ),
             }
             for r in recintos
@@ -88,23 +117,27 @@ async def get_dashboard(db: AsyncSession) -> dict:
     # Últimas alocações (entradas mais recentes).
     ult_rows = (
         await db.execute(
-            select(Alocacao, Animal, Especie, Recinto)
-            .join(Animal, Animal.nro_reg == Alocacao.animal)
-            .join(Especie, Especie.nome_cientifico == Animal.especie)
-            .join(Recinto, Recinto.recinto_gefau == Alocacao.recinto)
-            .order_by(Alocacao.data_entrada.desc())
-            .limit(6)
+            text(
+                "SELECT a.nro_reg, a.apelido, e.nome_comum, r.nome AS recinto_nome, "
+                "       al.data_entrada "
+                "FROM alocacao al "
+                "  JOIN animal a ON a.nro_reg = al.animal "
+                "  JOIN especie e ON e.nome_cientifico = a.especie "
+                "  JOIN recinto r ON r.recinto_gefau = al.recinto "
+                "ORDER BY al.data_entrada DESC "
+                "LIMIT 6"
+            )
         )
-    ).all()
+    ).mappings().all()
     ultimas_alocacoes = [
         {
-            "nro_reg": animal.nro_reg,
-            "apelido": animal.apelido,
-            "especie_nome_comum": especie.nome_comum,
-            "recinto_nome": recinto.nome,
-            "data_entrada": aloc.data_entrada,
+            "nro_reg": r["nro_reg"],
+            "apelido": r["apelido"],
+            "especie_nome_comum": r["nome_comum"],
+            "recinto_nome": r["recinto_nome"],
+            "data_entrada": r["data_entrada"],
         }
-        for aloc, animal, especie, recinto in ult_rows
+        for r in ult_rows
     ]
 
     return {

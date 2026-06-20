@@ -174,6 +174,7 @@ CREATE TABLE recinto (
     qnt_especies INTEGER DEFAULT 0 NOT NULL,
 
     CONSTRAINT pk_recinto PRIMARY KEY(recinto_gefau),
+    CONSTRAINT uk_recinto_nome UNIQUE(nome),
     CONSTRAINT ck_recinto_capacidade CHECK (qnt_animais <= capacidade_max)
 );
 

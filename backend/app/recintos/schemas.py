@@ -1,6 +1,7 @@
 from datetime import date
+from typing import Annotated
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, StringConstraints
 
 
 class RecintoResumo(BaseModel):
@@ -45,6 +46,18 @@ class RecintoDetalhe(RecintoResumo):
 
 
 class RecintoCreate(BaseModel):
-    recinto_gefau: str
-    nome: str
-    capacidade_max: int
+    """Dados de entrada do cadastro de recinto, com validação amigável.
+
+    Strings são aparadas (strip) e não podem ficar vazias; a capacidade deve ser
+    um inteiro positivo. Erros geram resposta 422 com mensagem clara ao usuário.
+    """
+
+    recinto_gefau: Annotated[
+        str,
+        StringConstraints(strip_whitespace=True, min_length=1, max_length=30),
+    ] = Field(description="Código GEFAU do recinto (único).")
+    nome: Annotated[
+        str,
+        StringConstraints(strip_whitespace=True, min_length=1, max_length=50),
+    ] = Field(description="Nome do recinto.")
+    capacidade_max: int = Field(ge=1, description="Capacidade máxima (>= 1).")

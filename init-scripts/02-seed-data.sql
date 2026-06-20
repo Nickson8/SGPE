@@ -20,7 +20,7 @@
 -- =====================================================================
 
 -- ── Espécies ──────────────────────────────────────────────────────────
-INSERT INTO ESPECIE (NomeCientifico, NomeComum, GrupoTaxonomico, PlanaDeManejo, Quantidade) VALUES
+INSERT INTO especie (nome_cientifico, nome_comum, grupo_taxonomico, plano_de_manejo, quantidade) VALUES
 ('Panthera onca',            'Onça-pintada',       'Mamíferos', 'S', 4),
 ('Myrmecophaga tridactyla',  'Tamanduá-bandeira',  'Mamíferos', 'S', 3),
 ('Leopardus pardalis',       'Jaguatirica',        'Mamíferos', 'S', 3),
@@ -37,7 +37,7 @@ INSERT INTO ESPECIE (NomeCientifico, NomeComum, GrupoTaxonomico, PlanaDeManejo, 
 ('Phyllomedusa bahiana',     'Perereca-macaco',    'Anfíbios',  'S', 2);
 
 -- ── Recintos (QntAnimais reflete alocações ativas; <= CapacidadeMax) ───
-INSERT INTO RECINTO (RecintoGEFAU, Nome, CapacidadeMax, QntAnimais, QntEspecies) VALUES
+INSERT INTO recinto (recinto_gefau, nome, capacidade_max, qnt_animais, qnt_especies) VALUES
 ('REC-101', 'Recinto das Onças - Setor A',     6,  4, 1),
 ('REC-102', 'Mata dos Felinos - Setor A',      4,  3, 1),
 ('REC-202', 'Savana e Cerrado - Setor B',     12,  5, 3),
@@ -52,7 +52,7 @@ INSERT INTO RECINTO (RecintoGEFAU, Nome, CapacidadeMax, QntAnimais, QntEspecies)
 ('REC-501', 'Anfibiário',                     30,  2, 1);
 
 -- ── Funcionários ──────────────────────────────────────────────────────
-INSERT INTO FUNCIONARIO (CPF, Nome, Telefone, Funcao) VALUES
+INSERT INTO funcionario (cpf, nome, telefone, funcao) VALUES
 ('12345678901', 'Dr. Carlos Silva',  '16999990001', 'VETERINARIO'),
 ('98765432100', 'Dra. Ana Souza',    '16999990002', 'BIOLOGO'),
 ('11122233344', 'Dr. Rui Mendes',    '16999990003', 'VETERINARIO'),
@@ -61,7 +61,7 @@ INSERT INTO FUNCIONARIO (CPF, Nome, Telefone, Funcao) VALUES
 
 -- ── Animais ─────────────────────────────────────────────────────────────
 -- (NroReg, Especie, DataNasc, Marcacao1, Marcacao2, Apelido, Sexo, Plantel, NroGEFAU, NroLivro)
-INSERT INTO ANIMAL (NroReg, Especie, DataNasc, Marcacao1, Marcacao2, Apelido, Sexo, Plantel, NroGEFAU, NroLivro) VALUES
+INSERT INTO animal (nro_reg, especie, data_nasc, marcacao_1, marcacao_2, apelido, sexo, plantel, nro_gefau, nro_livro) VALUES
 (1,  'Panthera onca',           '2020-05-12', 'CHIP-9810', 'BRINCO-01', 'Juma',     'F', 'S', 'GEFAU-001', 1001),
 (2,  'Panthera onca',           '2019-08-20', 'CHIP-9820', 'BRINCO-02', 'Tufão',    'M', 'S', 'GEFAU-002', 1002),
 (3,  'Myrmecophaga tridactyla', '2021-03-15', 'CHIP-1110', NULL,        'Dengo',    'M', 'S', 'GEFAU-003', 1003),
@@ -100,7 +100,7 @@ INSERT INTO ANIMAL (NroReg, Especie, DataNasc, Marcacao1, Marcacao2, Apelido, Se
 (36, 'Phyllomedusa bahiana',    '2023-03-21', 'TAG-A-02',  NULL,        'Saltão',   'M', 'S', 'GEFAU-036', 1036);
 
 -- ── Alocações (atuais: DataSaida NULL; + alguns históricos) ────────────
-INSERT INTO ALOCACAO (Animal, Recinto, DataEntrada, DataSaida, MotivoSaida) VALUES
+INSERT INTO alocacao (animal, recinto, data_entrada, data_saida, motivo_saida) VALUES
 -- atuais
 (1,  'REC-101', '2021-01-15', NULL, NULL),
 (2,  'REC-101', '2021-01-15', NULL, NULL),
@@ -144,7 +144,7 @@ INSERT INTO ALOCACAO (Animal, Recinto, DataEntrada, DataSaida, MotivoSaida) VALU
 
 -- ── Triagens ───────────────────────────────────────────────────────────
 -- Destaques com série temporal (peso/score) para os gráficos.
-INSERT INTO TRIAGEM (Animal, DataTriagem, PesoAoChegar, ScoreCorporal, GravidadeVeterinaria, Observacoes, IdadeNaTriagem) VALUES
+INSERT INTO triagem (animal, data_triagem, peso_ao_chegar, score_corporal, gravidade_veterinaria, observacoes, idade_na_triagem) VALUES
 -- Juma (1) - onça
 (1, '2025-01-15', 78.0, 3.0, 'Normal',  'Triagem de entrada anual',          4),
 (1, '2025-04-15', 80.5, 3.5, 'Normal',  'Ganho de peso adequado',            5),
@@ -183,21 +183,21 @@ INSERT INTO TRIAGEM (Animal, DataTriagem, PesoAoChegar, ScoreCorporal, Gravidade
 (30, '2026-02-15', 18.4, 4.0, 'Normal', 'Triagem dos quelônios',             21);
 
 -- ── Restrições (referência: TRIAGEM(Animal, DataTriagem); <= 30 chars) ──
-INSERT INTO RESTRICOES (Animal, DataTriagem, Restricao) VALUES
+INSERT INTO restricoes (animal, data_triagem, restricao) VALUES
 (3,  '2026-02-02', 'Evitar itens rigidos 48h'),
 (3,  '2025-02-02', 'Dieta pastosa supervisionada'),
 (27, '2026-01-08', 'Manejo com contencao fisica'),
 (1,  '2026-01-15', 'Sem restricoes ativas');
 
 -- ── Riscos (referência: TRIAGEM(Animal, DataTriagem); <= 30 chars) ──────
-INSERT INTO RISCO (Animal, DataTriagem, Risco) VALUES
+INSERT INTO risco (animal, data_triagem, risco) VALUES
 (1,  '2026-01-15', 'Baixo - habituado a contencao'),
 (3,  '2026-02-02', 'Medio - apatia alimentar'),
 (27, '2026-01-08', 'Alto - lesao de pele'),
 (13, '2026-01-20', 'Baixo - animal docil');
 
 -- ── Registros clínicos (ID único; ref TRIAGEM existente) ────────────────
-INSERT INTO REGISTROCLINICO (ID, Animal, DataTriagem, DataHoraRegistro, Ocorrencia, Tratamento, Funcionario) VALUES
+INSERT INTO registro_clinico (id, animal, data_triagem, data_hora_registro, ocorrencia, tratamento, funcionario) VALUES
 (101, 1,  '2026-01-15', '2026-01-15 11:30:00', 'Vacinação anual',            'Reforço vacinal tríplice felina',     '12345678901'),
 (102, 3,  '2026-02-02', '2026-02-02 10:00:00', 'Tratamento de endoparasitas','Vermífugo oral de amplo espectro',    '12345678901'),
 (103, 3,  '2025-05-02', '2025-05-02 09:00:00', 'Suporte nutricional',        'Suplementação vitamínica',            '98765432100'),
@@ -207,7 +207,7 @@ INSERT INTO REGISTROCLINICO (ID, Animal, DataTriagem, DataHoraRegistro, Ocorrenc
 (107, 1,  '2025-07-15', '2025-07-15 10:15:00', 'Exame odontológico',         'Limpeza dentária sob sedação',        '12345678901');
 
 -- ── Medicamentos administrados (ref REGISTROCLINICO.ID; DosePV numérico mL/dose) ──
-INSERT INTO MEDICAMENTOADMINISTRADO (ID, Medicamento, DosePV) VALUES
+INSERT INTO medicamento_administrado (id, medicamento, dose_pv) VALUES
 (101, 'Nobivac Triplice Felina', 1.0),
 (102, 'Praziquantel',            2.5),
 (102, 'Pirantel',                1.5),
@@ -219,7 +219,7 @@ INSERT INTO MEDICAMENTOADMINISTRADO (ID, Medicamento, DosePV) VALUES
 (107, 'Cetamina',                2.0);
 
 -- ── Exames (ref REGISTROCLINICO.ID) ─────────────────────────────────────
-INSERT INTO EXAMES (ID, DataExame, TipoExame, Resultados, Observacoes) VALUES
+INSERT INTO exames (id, data_exame, tipo_exame, resultados, observacoes) VALUES
 (101, '2026-01-15', 'Sorologia FIV/FeLV',   'Negativo para FIV e FeLV',                'Preventivo padrão'),
 (101, '2026-01-16', 'Hemograma completo',   'Parâmetros dentro da normalidade',        'Sem alterações'),
 (102, '2026-02-05', 'Coprológico controle', 'Ausência de ovos e oocistos',             'Pós-tratamento'),
@@ -228,44 +228,44 @@ INSERT INTO EXAMES (ID, DataExame, TipoExame, Resultados, Observacoes) VALUES
 (107, '2025-07-15', 'Radiografia de crânio','Sem fraturas; tártaro moderado',          'Indicada profilaxia');
 
 -- ── Registros biológicos (ref TRIAGEM(Animal, DataTriagem) + FUNCIONARIO) ──
-INSERT INTO REGISTROBIOLOGICO (Animal, DataTriagem, DataHoraRegistro, Ocorrencia, Detalhamento, AnexoLaudoSaude, Funcionario) VALUES
+INSERT INTO registro_biologico (animal, data_triagem, data_hora_registro, ocorrencia, detalhamento, anexo_laudo_saude, funcionario) VALUES
 (1,  '2026-01-15', '2026-01-15 11:00:00', 'Coleta de sangue de rotina', 'Veia cefálica para hemograma',     convert_to('laudo_hemograma_juma.pdf','UTF8'), '98765432100'),
 (3,  '2026-02-02', '2026-02-02 09:15:00', 'Coleta de material fecal',   'Análise coprológica solicitada',   convert_to('laudo_copro_dengo.pdf','UTF8'),    '98765432100'),
 (13, '2026-01-20', '2026-01-20 09:30:00', 'Avaliação comportamental',   'Etograma de 30 minutos',           convert_to('etograma_aurelio.pdf','UTF8'),     '55566677788'),
 (27, '2026-01-08', '2026-01-08 15:00:00', 'Biometria do plantel',       'Medição de comprimento total',     convert_to('biometria_dentao.pdf','UTF8'),     '55566677788');
 
 -- ── Casais ──────────────────────────────────────────────────────────────
-INSERT INTO CASAL (Animal_1, Animal_2) VALUES
+INSERT INTO casal (animal_1, animal_2) VALUES
 (2, 1),   -- Tufão e Juma
 (7, 6),   -- Bore e Maya
 (12, 11); -- Tonico e Maité
 
 -- ── Prole (ref CASAL(Pai,Mae) -> (Animal_1,Animal_2); ref ANIMAL(Prole)) ──
-INSERT INTO PROLE (Pai, Mae, Prole) VALUES
+INSERT INTO prole (pai, mae, prole) VALUES
 (2, 1, 4),  -- Tufão + Juma -> Pipoca
 (2, 1, 5);  -- Tufão + Juma -> Fumaça
 
 -- ── Itens de cardápio ─────────────────────────────────────────────────────
-INSERT INTO ITEMCARDAPIO (Animal, Alimento, Quantidade, Observacoes, Frequencia) VALUES
+INSERT INTO item_cardapio (animal, alimento, quantidade, observacoes, frequencia) VALUES
 (1, 'Carne bovina com osso',          5.5, 'Oferecer no final da tarde',                 'Diário'),
 (3, 'Suplemento de insetos batido',   2.0, 'Adicionar complexo vitamínico',              'Duas vezes ao dia'),
 (8, 'Carne magra e frango',           1.2, 'Dieta de felino de pequeno porte',           'Diário'),
 (27,'Peixe e carne vermelha',         3.0, 'Oferta em dias alternados',                  'Dia sim, dia não');
 
 -- ── Descrições de rotina (TipoRotina: 'Condicionamento' | 'Enriquecimento') ──
-INSERT INTO DESCRICAOROTINA (Animal, TipoRotina, Objetivo, Metodologia, Ferramentas, Frequencia, Tipo, Comandos) VALUES
+INSERT INTO descricao_rotina (animal, tipo_rotina, objetivo, metodologia, ferramentas, frequencia, tipo, comandos) VALUES
 (1,  'Enriquecimento', 'Estimular comportamento de caça', 'Esconder porções de carne em caixas suspensas', 'Caixas de papelão, cordas de sisal', 'Semanal', 'Cognitivo/Alimentar', NULL),
 (3,  'Condicionamento','Exercício físico e desgaste de garras', 'Conduzir o animal em área gramada controlada', 'Guia peitoral adaptada', '3 vezes por semana', NULL, 'Vem, fica, anda'),
 (13, 'Enriquecimento', 'Reduzir comportamento estereotipado', 'Distribuir frutas em pontos variados do recinto', 'Comedouros móveis', 'Diário', 'Alimentar', NULL);
 
 -- ── Registros de rotina (ref DESCRICAOROTINA; DiasSemana binário CHAR(7)) ──
-INSERT INTO REGISTROROTINA (Animal, TipoRotina, DataHorario, Observacoes, DiasSemana) VALUES
+INSERT INTO registro_rotina (animal, tipo_rotina, data_horario, observacoes, dias_semana) VALUES
 (1,  'Enriquecimento',  '2026-01-19 10:00:00', 'Interagiu com o estímulo por 25 minutos', '1000000'),
 (3,  'Condicionamento', '2026-01-20 08:30:00', 'Bom ritmo, explorou troncos caídos',      '1010100'),
 (13, 'Enriquecimento',  '2026-01-21 09:00:00', 'Forrageou em todos os pontos',            '1111111');
 
 -- ── Documentos (Anexo BYTEA NOT NULL; consistência de migração) ─────────
-INSERT INTO DOCUMENTO (TipoDocumento, NroDocumento, Animal, Anexo, DataCadastro, Observacao, TipoMigracao, Destino, Origem) VALUES
+INSERT INTO documento (tipo_documento, nro_documento, animal, anexo, data_cadastro, observacao, tipo_migracao, destino, origem) VALUES
 ('Termo de Transferência', 'DOC-9921-A', 1,  convert_to('termo_juma.pdf','UTF8'),       '2021-01-10', 'Cedida pelo Zoológico de São Paulo',  'Entrada', NULL, 'Zoológico de São Paulo'),
 ('Laudo de Nascimento',    'DOC-1122-B', 3,  convert_to('laudo_nasc_dengo.pdf','UTF8'), '2021-03-15', 'Nascido em cativeiro autorizado',     'Entrada', NULL, 'Maternidade BioParque'),
 ('Laudo de Necrópsia',     'DOC-3030-C', 30, convert_to('laudo_casco.pdf','UTF8'),      '2024-05-01', 'Documento clínico comum',             NULL,      NULL, NULL);

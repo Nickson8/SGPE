@@ -7,10 +7,6 @@ from app.dashboard.router import router as dashboard_router
 from app.especies.router import router as especies_router
 from app.recintos.router import router as recintos_router
 
-# Importa os modelos sem módulo dedicado para que o mapeamento das tabelas
-# seja registrado na metadata do SQLAlchemy (apenas espelhamento de leitura).
-from app.shared import models as _shared_models  # noqa: F401
-
 app = FastAPI(
     title="SGPE API",
     description="API do Sistema de Gestão para Parques Ecológicos (somente leitura).",
