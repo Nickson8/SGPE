@@ -1,329 +1,300 @@
--- =====================================================================
--- SGPE — Esquema do banco (PostgreSQL)
--- =====================================================================
--- Tradução fiel do DDL original (sql/create-tables.sql), que foi escrito
--- para Oracle, para PostgreSQL. O ESQUEMA é o núcleo do projeto e NÃO é
--- alterado em sua semântica: mesmas tabelas, colunas, chaves e restrições.
---
--- Conversões Oracle -> PostgreSQL aplicadas:
---   VARCHAR2(n)                 -> VARCHAR(n)
---   FLOAT                       -> DOUBLE PRECISION
---   BLOB                        -> BYTEA
---   REGEXP_LIKE(col, '...')     -> col ~ '...'
---   "ON UPDATE CASCADE c/ Trigger" (comentário Oracle) -> ON UPDATE CASCADE nativo
---   Correção do nome da PK PK_REGISTROCLINOCO -> PK_REGISTROCLINICO
---
--- Identificadores não são "aspeados": o PostgreSQL os normaliza para
--- minúsculas (ex.: NomeCientifico == nomecientifico). Os modelos
--- SQLAlchemy do backend mapeiam os nomes em minúsculas.
---
--- Este script roda automaticamente na PRIMEIRA inicialização do container
--- Postgres (/docker-entrypoint-initdb.d), em ordem de nome de arquivo.
--- =====================================================================
-
 -----------------------------------------------------------------------
------------------------------ PARTE JUAN ------------------------------
+-------------------------- PARTE JUAN (REVISADA) ----------------------
 -----------------------------------------------------------------------
 
-CREATE TABLE ESPECIE(
-    NomeCientifico VARCHAR(30) NOT NULL,
-    NomeComum VARCHAR(30),
-    GrupoTaxonomico VARCHAR(30),
+CREATE TABLE especie (
+    nome_cientifico VARCHAR(30) NOT NULL,
+    nome_comum VARCHAR(30),
+    grupo_taxonomico VARCHAR(30),
     -- 'S': Existe plano, e 'N': Não existe.
-    PlanaDeManejo CHAR(1),
-    Quantidade INTEGER,
+    plano_de_manejo CHAR(1),
+    quantidade INTEGER,
 
-    CONSTRAINT PK_ESPECIE PRIMARY KEY(NomeCientifico),
-    CONSTRAINT CK_ESPECIE_PLANODEMANEJO CHECK(PlanaDeManejo IN ('S', 'N'))
+    CONSTRAINT pk_especie PRIMARY KEY(nome_cientifico),
+    CONSTRAINT ck_especie_plano_manejo CHECK(plano_de_manejo IN ('S', 'N'))
 );
 
-CREATE TABLE ANIMAL(
-    NroReg INTEGER NOT NULL,
-    Especie VARCHAR(30) NOT NULL,
-    DataNasc DATE NOT NULL,
-    Marcacao1 VARCHAR(30),
-    Marcacao2 VARCHAR(30),
-    Apelido VARCHAR(30),
+CREATE TABLE animal (
+    nro_reg INTEGER NOT NULL,
+    especie VARCHAR(30) NOT NULL,
+    data_nasc DATE NOT NULL,
+    marcacao_1 VARCHAR(30),
+    marcacao_2 VARCHAR(30),
+    apelido VARCHAR(30),
     -- 'M': Macho, 'F': Fêmea e 'I': Indeterminado.
-    Sexo CHAR(1),
+    sexo CHAR(1),
     -- 'S': Pertence ao plantel, 'N': Não pertence.
-    Plantel VARCHAR(30) NOT NULL,
-    NroGEFAU VARCHAR(30),
-    NroLivro INTEGER NOT NULL,
+    plantel VARCHAR(30) NOT NULL,
+    nro_gefau VARCHAR(30),
+    nro_livro INTEGER NOT NULL,
 
-    CONSTRAINT PK_ANIMAL PRIMARY KEY(NroReg),
-    CONSTRAINT UK1_ANIMAL_NROGEFAU UNIQUE(NroGEFAU),
-    CONSTRAINT UK2_ANIMAL_NROLIVRO UNIQUE(NroLivro),
-    CONSTRAINT CK_ANIMAL_SEXO CHECK(Sexo IN ('M', 'F', 'I')),
-    CONSTRAINT CK_ANIMAL_PLANTEL CHECK(Plantel IN ('S', 'N')),
-    CONSTRAINT FK_ANIMAL_ESPECIE FOREIGN KEY(Especie)
-        REFERENCES ESPECIE(NomeCientifico)
+    CONSTRAINT pk_animal PRIMARY KEY(nro_reg),
+    CONSTRAINT uk1_animal_nro_gefau UNIQUE(nro_gefau),
+    CONSTRAINT uk2_animal_nro_livro UNIQUE(nro_livro),
+    CONSTRAINT ck_animal_sexo CHECK(sexo IN ('M', 'F', 'I')),
+    CONSTRAINT ck_animal_plantel CHECK(plantel IN ('S', 'N')),
+    CONSTRAINT ck_animal_data_nasc CHECK(data_nasc <= CURRENT_DATE),
+    CONSTRAINT fk_animal_especie FOREIGN KEY(especie)
+        REFERENCES especie(nome_cientifico)
         ON UPDATE CASCADE
+        ON DELETE RESTRICT
 );
 
-CREATE TABLE TRIAGEM(
-    Animal INTEGER NOT NULL,
-    DataTriagem DATE NOT NULL,
-    PesoAoChegar DOUBLE PRECISION,
-    ScoreCorporal DOUBLE PRECISION,
-    GravidadeVeterinaria VARCHAR(30),
-    Observacoes VARCHAR(50),
-    IdadeNaTriagem INTEGER,
+CREATE TABLE triagem (
+    animal INTEGER NOT NULL,
+    data_triagem DATE NOT NULL,
+    peso_ao_chegar NUMERIC(7,3),
+    score_corporal INTEGER,
+    gravidade_veterinaria VARCHAR(30),
+    observacoes VARCHAR(50),
+    idade_na_triagem INTEGER,
 
-    CONSTRAINT PK_TRIAGEM PRIMARY KEY(Animal, DataTriagem),
-    CONSTRAINT FK_TRIAGEM_ANIMAL FOREIGN KEY(Animal)
-        REFERENCES ANIMAL(NroReg)
+    CONSTRAINT pk_triagem PRIMARY KEY(animal, data_triagem),
+    CONSTRAINT ck_triagem_score CHECK (score_corporal BETWEEN 1 AND 5),
+    CONSTRAINT ck_triagem_data CHECK (data_triagem <= CURRENT_DATE),
+    CONSTRAINT fk_triagem_animal FOREIGN KEY(animal)
+        REFERENCES animal(nro_reg)
+        ON UPDATE CASCADE
         ON DELETE CASCADE
-        ON UPDATE CASCADE
 );
 
-CREATE TABLE RESTRICOES(
-    Animal INTEGER NOT NULL,
-    DataTriagem DATE NOT NULL,
-    Restricao VARCHAR(30) NOT NULL,
+CREATE TABLE restricoes (
+    animal INTEGER NOT NULL,
+    data_triagem DATE NOT NULL, 
+    restricao VARCHAR(30) NOT NULL,
 
-    CONSTRAINT PK_RESTRICOES PRIMARY KEY(Animal, DataTriagem, Restricao),
-    CONSTRAINT FK_RESTRICOES_TRIAGEM FOREIGN KEY(Animal, DataTriagem)
-        REFERENCES TRIAGEM(Animal, DataTriagem)
+    CONSTRAINT pk_restricoes PRIMARY KEY(animal, data_triagem, restricao),
+    CONSTRAINT fk_restricoes_triagem FOREIGN KEY(animal, data_triagem)
+        REFERENCES triagem(animal, data_triagem)
+        ON UPDATE CASCADE
         ON DELETE CASCADE
-        ON UPDATE CASCADE
 );
 
-CREATE TABLE RISCO(
-    Animal INTEGER NOT NULL,
-    DataTriagem DATE NOT NULL,
-    Risco VARCHAR(30) NOT NULL,
+CREATE TABLE risco (
+    animal INTEGER NOT NULL,
+    data_triagem DATE NOT NULL,
+    risco VARCHAR(30) NOT NULL,
 
-    CONSTRAINT PK_RISCO PRIMARY KEY(Animal, DataTriagem, Risco),
-    CONSTRAINT FK_RISCO_TRIAGEM FOREIGN KEY(Animal, DataTriagem)
-        REFERENCES TRIAGEM(Animal, DataTriagem)
+    CONSTRAINT pk_risco PRIMARY KEY(animal, data_triagem, risco),
+    CONSTRAINT fk_risco_triagem FOREIGN KEY(animal, data_triagem)
+        REFERENCES triagem(animal, data_triagem)
+        ON UPDATE CASCADE
         ON DELETE CASCADE
-        ON UPDATE CASCADE
 );
 
-CREATE TABLE FUNCIONARIO(
+CREATE TABLE funcionario (
     -- Armazena-se apenas os numeros
-    CPF CHAR(11) NOT NULL,
-    Nome VARCHAR(30),
-    Telefone VARCHAR(20),
-    -- Tamanho 20 supondo possivel novas funcoes.
-    Funcao VARCHAR(20) DEFAULT 'VISITANTE',
+    cpf CHAR(11) NOT NULL,
+    nome VARCHAR(30),
+    telefone VARCHAR(20),
+    funcao VARCHAR(20) DEFAULT 'VISITANTE',
 
-    CONSTRAINT PK_FUNCIONARIO PRIMARY KEY(CPF),
-    CONSTRAINT CK_FUNC_CPF CHECK(LENGTH(CPF) = 11),
-    CONSTRAINT CK_FUNC_TELEFONE CHECK(LENGTH(Telefone) >= 8),
-    CONSTRAINT CK_FUNC_FUNCAO CHECK
-        (Funcao IN ('ADMINISTRADOR', 'VETERINARIO', 'BIOLOGO', 'VISITANTE'))
+    CONSTRAINT pk_funcionario PRIMARY KEY(cpf),
+    CONSTRAINT ck_func_cpf CHECK(LENGTH(cpf) = 11),
+    CONSTRAINT ck_func_telefone CHECK(LENGTH(telefone) >= 8),
+    CONSTRAINT ck_func_funcao CHECK (funcao IN ('ADMINISTRADOR', 'VETERINARIO', 'BIOLOGO', 'VISITANTE'))
 );
 
-CREATE TABLE REGISTROBIOLOGICO(
-    Animal INTEGER NOT NULL,
-    DataTriagem DATE NOT NULL,
-    DataHoraRegistro TIMESTAMP NOT NULL,
-    Ocorrencia VARCHAR(50),
-    Detalhamento VARCHAR(50),
-    AnexoLaudoSaude BYTEA,
-    Funcionario CHAR(11) NOT NULL,
+CREATE TABLE registro_biologico (
+    animal INTEGER NOT NULL,
+    data_triagem DATE NOT NULL,
+    data_hora_registro TIMESTAMP NOT NULL, -- Alterado para TIMESTAMP para guardar a hora
+    ocorrencia VARCHAR(50),
+    detalhamento VARCHAR(50),
+    anexo_laudo_saude BYTEA, -- Equivalente Postgres para BLOB
+    funcionario CHAR(11) NOT NULL,
 
-    CONSTRAINT PK_REGISTROBIOLOGICO PRIMARY KEY(Animal, DataTriagem, DataHoraRegistro),
-    CONSTRAINT FK_REGISTROBIOLOGICO_TRIAGEM FOREIGN KEY(Animal, DataTriagem)
-        REFERENCES TRIAGEM(Animal, DataTriagem)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    CONSTRAINT FK_REGISTROBIOLOGICO_FUNCIONARIO FOREIGN KEY(Funcionario)
-        REFERENCES FUNCIONARIO(CPF)
+    CONSTRAINT pk_registro_biologico PRIMARY KEY(animal, data_triagem, data_hora_registro),
+    CONSTRAINT fk_regbiologico_triagem FOREIGN KEY(animal, data_triagem)
+        REFERENCES triagem(animal, data_triagem)
         ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_regbiologico_funcionario FOREIGN KEY(funcionario)
+        REFERENCES funcionario(cpf)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
 );
 
-CREATE TABLE REGISTROCLINICO(
-    ID INTEGER NOT NULL,
-    Animal INTEGER NOT NULL,
-    DataTriagem DATE NOT NULL,
-    DataHoraRegistro TIMESTAMP NOT NULL,
-    Ocorrencia VARCHAR(50) NOT NULL,
-    Tratamento VARCHAR(50),
-    Funcionario CHAR(11) NOT NULL,
+CREATE TABLE registro_clinico (
+    id INTEGER NOT NULL,
+    animal INTEGER NOT NULL,
+    data_triagem DATE NOT NULL,
+    data_hora_registro TIMESTAMP NOT NULL, -- Alterado para TIMESTAMP para guardar a hora
+    ocorrencia VARCHAR(50) NOT NULL,
+    tratamento VARCHAR(50),
+    funcionario CHAR(11) NOT NULL,
 
-    CONSTRAINT PK_REGISTROCLINICO PRIMARY KEY(ID),
-    CONSTRAINT UK_REGISTROCLINICO UNIQUE(Animal, DataTriagem, DataHoraRegistro),
-    CONSTRAINT FK_REGISTROCLINICO_TRIAGEM FOREIGN KEY(Animal, DataTriagem)
-        REFERENCES TRIAGEM(Animal, DataTriagem)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    CONSTRAINT FK_REGISTROCLINICO_FUNCIONARIO FOREIGN KEY(Funcionario)
-        REFERENCES FUNCIONARIO(CPF)
+    CONSTRAINT pk_registro_clinico PRIMARY KEY(id),
+    CONSTRAINT uk_registro_clinico UNIQUE(animal, data_triagem, data_hora_registro),
+    CONSTRAINT fk_regclinico_triagem FOREIGN KEY(animal, data_triagem)
+        REFERENCES triagem(animal, data_triagem)
         ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_regclinico_funcionario FOREIGN KEY(funcionario)
+        REFERENCES funcionario(cpf)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
 );
 
-CREATE TABLE MEDICAMENTOADMINISTRADO(
-    ID INTEGER NOT NULL,
-    Medicamento VARCHAR(30) NOT NULL,
-    DosePV DOUBLE PRECISION,
+CREATE TABLE medicamento_administrado (
+    id INTEGER NOT NULL,
+    medicamento VARCHAR(30) NOT NULL,
+    dose_pv NUMERIC(7,3),
 
-    CONSTRAINT PK_MEDICAMENTOADMINISTRADO PRIMARY KEY(ID, Medicamento),
-    CONSTRAINT FK_MEDICAMENTOADMINISTRADO_REGISTROCLINICO FOREIGN KEY(ID)
-        REFERENCES REGISTROCLINICO(ID)
-        ON DELETE CASCADE
+    CONSTRAINT pk_medicamento_adm PRIMARY KEY(id, medicamento),
+    CONSTRAINT fk_medicamento_adm_regclinico FOREIGN KEY(id)
+        REFERENCES registro_clinico(id)
         ON UPDATE CASCADE
+        ON DELETE CASCADE
 );
 
-CREATE TABLE EXAMES(
-    ID INTEGER NOT NULL,
-    DataExame DATE NOT NULL,
-    TipoExame VARCHAR(30),
-    Resultados VARCHAR(100),
-    Observacoes VARCHAR(50),
+CREATE TABLE exames (
+    id INTEGER NOT NULL,
+    data_exame DATE NOT NULL,
+    tipo_exame VARCHAR(30),
+    resultados VARCHAR(100),
+    observacoes VARCHAR(50),
 
-    CONSTRAINT PK_EXAMES PRIMARY KEY(ID, DataExame, TipoExame),
-    CONSTRAINT FK_EXAMES_REGCLINICO FOREIGN KEY(ID)
-        REFERENCES REGISTROCLINICO(ID)
-        ON DELETE CASCADE
+    CONSTRAINT pk_exames PRIMARY KEY(id, data_exame, tipo_exame),
+    CONSTRAINT fk_exames_regclinico FOREIGN KEY(id)
+        REFERENCES registro_clinico(id)
         ON UPDATE CASCADE
+        ON DELETE CASCADE
 );
 
 -----------------------------------------------------------------------
---------------------------- PARTE DANTE -------------------------------
+-------------------------- PARTE DANTE (REVISADA) ---------------------
 -----------------------------------------------------------------------
 
-CREATE TABLE RECINTO(
-    RecintoGEFAU VARCHAR(30) NOT NULL,
-    Nome VARCHAR(50) NOT NULL,
-    CapacidadeMax INTEGER NOT NULL,
-    QntAnimais INTEGER DEFAULT 0 NOT NULL,
-    QntEspecies INTEGER DEFAULT 0 NOT NULL,
+CREATE TABLE recinto (
+    recinto_gefau VARCHAR(30) NOT NULL,
+    nome VARCHAR(50) NOT NULL,
+    capacidade_max INTEGER NOT NULL,
+    qnt_animais INTEGER DEFAULT 0 NOT NULL,
+    qnt_especies INTEGER DEFAULT 0 NOT NULL,
 
-    CONSTRAINT PK_RECINTO PRIMARY KEY(RecintoGEFAU),
-    -- Nota 4: A quantidade de animais no recinto não pode ultrapassar sua capacidade máxima.
-    CONSTRAINT CK_RECINTO_CAPACIDADE CHECK (QntAnimais <= CapacidadeMax)
+    CONSTRAINT pk_recinto PRIMARY KEY(recinto_gefau),
+    CONSTRAINT ck_recinto_capacidade CHECK (qnt_animais <= capacidade_max)
 );
 
-CREATE TABLE ALOCACAO(
-    Animal INTEGER NOT NULL,
-    Recinto VARCHAR(30) NOT NULL,
-    DataEntrada DATE NOT NULL,
-    DataSaida DATE,
-    MotivoSaida VARCHAR(100),
+CREATE TABLE alocacao (
+    animal INTEGER NOT NULL,
+    recinto VARCHAR(30) NOT NULL,
+    data_entrada DATE NOT NULL,
+    data_saida DATE,
+    motivo_saida VARCHAR(100),
 
-    CONSTRAINT PK_ALOCACAO PRIMARY KEY(Animal, Recinto, DataEntrada),
-    -- ON DELETE CASCADE: deletar o animal remove seu histórico de alocações.
-    CONSTRAINT FK_ALOCACAO_ANIMAL FOREIGN KEY(Animal)
-        REFERENCES ANIMAL(NroReg)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    -- Sem ON DELETE CASCADE (RESTRICT): evita deletar recinto com histórico.
-    CONSTRAINT FK_ALOCACAO_RECINTO FOREIGN KEY(Recinto)
-        REFERENCES RECINTO(RecintoGEFAU)
-        ON UPDATE CASCADE,
-    -- Nota 5: A data de saída deve ser posterior à de entrada.
-    CONSTRAINT CK_ALOCACAO_DATAS CHECK (DataSaida IS NULL OR DataSaida > DataEntrada)
-);
-
-CREATE TABLE CASAL(
-    Animal_1 INTEGER NOT NULL,
-    Animal_2 INTEGER NOT NULL,
-
-    CONSTRAINT PK_CASAL PRIMARY KEY(Animal_1, Animal_2),
-    CONSTRAINT FK_CASAL_ANIMAL1 FOREIGN KEY(Animal_1)
-        REFERENCES ANIMAL(NroReg)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    CONSTRAINT FK_CASAL_ANIMAL2 FOREIGN KEY(Animal_2)
-        REFERENCES ANIMAL(NroReg)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    -- Nota 6: Um animal não pode ser pareado consigo mesmo.
-    CONSTRAINT CK_CASAL_DIFERENTES CHECK (Animal_1 <> Animal_2)
-);
-
-CREATE TABLE PROLE(
-    Pai INTEGER NOT NULL,
-    Mae INTEGER NOT NULL,
-    Prole INTEGER NOT NULL,
-
-    CONSTRAINT PK_PROLE PRIMARY KEY(Prole),
-    CONSTRAINT FK_PROLE_CASAL FOREIGN KEY(Pai, Mae)
-        REFERENCES CASAL(Animal_1, Animal_2)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    CONSTRAINT FK_PROLE_ANIMAL FOREIGN KEY(Prole)
-        REFERENCES ANIMAL(NroReg)
-        ON DELETE CASCADE
+    CONSTRAINT pk_alocacao PRIMARY KEY(animal, recinto, data_entrada),
+    CONSTRAINT fk_alocacao_animal FOREIGN KEY(animal)
+        REFERENCES animal(nro_reg)
         ON UPDATE CASCADE
-);
-
-CREATE TABLE ITEMCARDAPIO(
-    Animal INTEGER NOT NULL,
-    Alimento VARCHAR(50) NOT NULL,
-    Quantidade DOUBLE PRECISION,
-    Observacoes VARCHAR(100),
-    Frequencia VARCHAR(30),
-
-    CONSTRAINT PK_ITEMCARDAPIO PRIMARY KEY(Animal, Alimento),
-    CONSTRAINT FK_ITEMCARDAPIO_ANIMAL FOREIGN KEY(Animal)
-        REFERENCES ANIMAL(NroReg)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_alocacao_recinto FOREIGN KEY(recinto)
+        REFERENCES recinto(recinto_gefau)
         ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    CONSTRAINT ck_alocacao_datas CHECK (data_saida IS NULL OR data_saida > data_entrada)
 );
 
-CREATE TABLE DESCRICAOROTINA(
-    Animal INTEGER NOT NULL,
-    TipoRotina VARCHAR(20) NOT NULL,
-    Objetivo VARCHAR(100) NOT NULL,
-    Metodologia VARCHAR(500) NOT NULL,
-    Ferramentas VARCHAR(200),
-    Frequencia VARCHAR(30) NOT NULL,
-    -- Atributo específico de Enriquecimento
-    Tipo VARCHAR(30),
-    -- Atributo específico de Condicionamento
-    Comandos VARCHAR(200),
+CREATE TABLE casal (
+    animal_1 INTEGER NOT NULL,
+    animal_2 INTEGER NOT NULL,
 
-    CONSTRAINT PK_DESCRICAOROTINA PRIMARY KEY(Animal, TipoRotina),
-    CONSTRAINT FK_DESCRICAOROTINA_ANIMAL FOREIGN KEY(Animal)
-        REFERENCES ANIMAL(NroReg)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    -- Nota 10: TipoRotina restrito a estes dois valores literais.
-    CONSTRAINT CK_DESCRICAOROTINA_TIPOROT CHECK (TipoRotina IN ('Condicionamento', 'Enriquecimento'))
+    CONSTRAINT pk_casal PRIMARY KEY(animal_1, animal_2),
+    CONSTRAINT fk_casal_animal1 FOREIGN KEY(animal_1)
+        REFERENCES animal(nro_reg)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_casal_animal2 FOREIGN KEY(animal_2)
+        REFERENCES animal(nro_reg)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT ck_casal_diferentes CHECK (animal_1 <> animal_2)
 );
 
-CREATE TABLE REGISTROROTINA(
-    Animal INTEGER NOT NULL,
-    TipoRotina VARCHAR(20) NOT NULL,
-    DataHorario TIMESTAMP NOT NULL,
-    Observacoes VARCHAR(100),
-    DiasSemana CHAR(7) NOT NULL,
+CREATE TABLE prole (
+    pai INTEGER NOT NULL,
+    mae INTEGER NOT NULL,
+    prole INTEGER NOT NULL,
 
-    CONSTRAINT PK_REGISTROROTINA PRIMARY KEY(Animal, TipoRotina, DataHorario),
-    CONSTRAINT FK_REGISTROROTINA_DESC FOREIGN KEY(Animal, TipoRotina)
-        REFERENCES DESCRICAOROTINA(Animal, TipoRotina)
+    CONSTRAINT pk_prole PRIMARY KEY(prole),
+    CONSTRAINT fk_prole_casal FOREIGN KEY(pai, mae)
+        REFERENCES casal(animal_1, animal_2)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_prole_animal FOREIGN KEY(prole)
+        REFERENCES animal(nro_reg)
+        ON UPDATE CASCADE
         ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    -- Nota 26: Formato exato X1..X7, onde Xi=1 ou 0 (sequência binária de 7 dígitos).
-    CONSTRAINT CK_REGISTROROTINA_DIAS CHECK (LENGTH(DiasSemana) = 7 AND DiasSemana ~ '^[01]{7}$')
 );
 
-CREATE TABLE DOCUMENTO(
-    TipoDocumento VARCHAR(50) NOT NULL,
-    NroDocumento VARCHAR(50) NOT NULL,
-    Animal INTEGER NOT NULL,
-    Anexo BYTEA NOT NULL,
-    DataCadastro DATE NOT NULL,
-    Observacao VARCHAR(200),
-    TipoMigracao VARCHAR(20),
-    Destino VARCHAR(50),
-    Origem VARCHAR(50),
+CREATE TABLE item_cardapio (
+    animal INTEGER NOT NULL,
+    alimento VARCHAR(50) NOT NULL,
+    quantidade NUMERIC(7,3),
+    observacoes VARCHAR(100),
+    frequencia VARCHAR(30),
 
-    CONSTRAINT PK_DOCUMENTO PRIMARY KEY(TipoDocumento, NroDocumento),
-    CONSTRAINT FK_DOCUMENTO_ANIMAL FOREIGN KEY(Animal)
-        REFERENCES ANIMAL(NroReg)
+    CONSTRAINT pk_item_cardapio PRIMARY KEY(animal, alimento),
+    CONSTRAINT fk_item_cardapio_animal FOREIGN KEY(animal)
+        REFERENCES animal(nro_reg)
+        ON UPDATE CASCADE
         ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    -- Nota 6/21: aceita "Entrada"/"Baixa"; NULL para documentos comuns (não-migração).
-    CONSTRAINT CK_DOCUMENTO_MIGRACAO CHECK (TipoMigracao IN ('Entrada', 'Baixa', NULL)),
-    -- Consistência dos atributos das especializações colapsadas na base (Nota 21).
-    CONSTRAINT CK_DOCUMENTO_ESPECIALIZACAO CHECK (
-        (TipoMigracao = 'Entrada' AND Origem IS NOT NULL AND Destino IS NULL) OR
-        (TipoMigracao = 'Baixa' AND Destino IS NOT NULL AND Origem IS NULL) OR
-        (TipoMigracao IS NULL AND Origem IS NULL AND Destino IS NULL)
+);
+
+CREATE TABLE descricao_rotina (
+    animal INTEGER NOT NULL,
+    tipo_rotina VARCHAR(20) NOT NULL,
+    objetivo VARCHAR(100) NOT NULL,
+    metodologia VARCHAR(500) NOT NULL,
+    ferramentas VARCHAR(200),
+    frequencia VARCHAR(30) NOT NULL,
+    tipo VARCHAR(30),
+    comandos VARCHAR(200),
+
+    CONSTRAINT pk_descricao_rotina PRIMARY KEY(animal, tipo_rotina),
+    CONSTRAINT fk_descricao_rotina_animal FOREIGN KEY(animal)
+        REFERENCES animal(nro_reg)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT ck_desc_rotina_tipo CHECK (tipo_rotina IN ('Condicionamento', 'Enriquecimento'))
+);
+
+CREATE TABLE registro_rotina (
+    animal INTEGER NOT NULL,
+    tipo_rotina VARCHAR(20) NOT NULL,
+    data_horario TIMESTAMP NOT NULL, -- Alterado para TIMESTAMP
+    observacoes VARCHAR(100),
+    dias_semana CHAR(7) NOT NULL,
+
+    CONSTRAINT pk_registro_rotina PRIMARY KEY(animal, tipo_rotina, data_horario),
+    CONSTRAINT fk_registro_rotina_desc FOREIGN KEY(animal, tipo_rotina)
+        REFERENCES descricao_rotina(animal, tipo_rotina)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT ck_registro_rotina_dias CHECK (LENGTH(dias_semana) = 7 AND dias_semana ~ '^[01]{7}$') -- Adaptado para Regex do Postgres
+);
+
+CREATE TABLE documento (
+    tipo_documento VARCHAR(50) NOT NULL,
+    nro_documento VARCHAR(50) NOT NULL,
+    animal INTEGER NOT NULL,
+    anexo BYTEA NOT NULL, -- Equivalente Postgres para BLOB
+    data_cadastro DATE NOT NULL,
+    observacao VARCHAR(200),
+    tipo_migracao VARCHAR(20),
+    destino VARCHAR(50),
+    origem VARCHAR(50),
+
+    CONSTRAINT pk_documento PRIMARY KEY(tipo_documento, nro_documento),
+    CONSTRAINT fk_documento_animal FOREIGN KEY(animal)
+        REFERENCES animal(nro_reg)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT ck_documento_migracao CHECK (tipo_migracao IN ('Entrada', 'Baixa', NULL)),
+    CONSTRAINT ck_documento_especializacao CHECK (
+        (tipo_migracao = 'Entrada' AND origem IS NOT NULL AND destino IS NULL) OR
+        (tipo_migracao = 'Baixa' AND destino IS NOT NULL AND origem IS NULL) OR
+        (tipo_migracao IS NULL AND origem IS NULL AND destino IS NULL)
     )
 );
