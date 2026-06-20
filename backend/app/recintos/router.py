@@ -7,7 +7,6 @@ from app.recintos.schemas import RecintoCreate, RecintoDetalhe, RecintoResumo
 from app.recintos.services import (
     CapacidadeInvalidaError,
     ErroBancoDados,
-    NomeRecintoJaExisteError,
     RecintoDuplicadoError,
 )
 
@@ -30,11 +29,6 @@ async def criar_recinto(data: RecintoCreate, db: AsyncSession = Depends(get_db))
         raise HTTPException(
             status_code=409,
             detail=f"Já existe um recinto com o código GEFAU '{data.recinto_gefau}'.",
-        )
-    except NomeRecintoJaExisteError:
-        raise HTTPException(
-            status_code=409,
-            detail=f"Já existe um recinto com o nome '{data.nome}'.",
         )
     except CapacidadeInvalidaError:
         raise HTTPException(

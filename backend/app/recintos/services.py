@@ -18,10 +18,6 @@ class RecintoDuplicadoError(Exception):
     """Já existe um recinto com o mesmo código GEFAU (violação de PK)."""
 
 
-class NomeRecintoJaExisteError(Exception):
-    """Já existe um recinto com o mesmo nome (violação de UNIQUE)."""
-
-
 class CapacidadeInvalidaError(Exception):
     """Capacidade incompatível com o número de animais (violação de CHECK)."""
 
@@ -97,8 +93,6 @@ async def create_recinto(db: AsyncSession, data: RecintoCreate) -> dict:
         constraint = _constraint_name(exc)
         if constraint == "pk_recinto":
             raise RecintoDuplicadoError() from exc
-        if constraint == "uk_recinto_nome":
-            raise NomeRecintoJaExisteError() from exc
         if constraint == "ck_recinto_capacidade":
             raise CapacidadeInvalidaError() from exc
         # Qualquer outra violação de integridade não prevista.
