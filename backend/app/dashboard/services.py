@@ -1,4 +1,4 @@
-from sqlalchemy import text
+from sqlalchemy import bindparam, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.recintos.services import percentual_ocupacao, status_ocupacao
@@ -155,3 +155,43 @@ async def get_dashboard(db: AsyncSession) -> dict:
         "recintos_capacidade": recintos_capacidade,
         "ultimas_alocacoes": ultimas_alocacoes,
     }
+
+
+async def animais_em_alerta(db: AsyncSession, especies: list[str]) -> list[dict]:
+    """Consulta parametrizada (Consulta 1 do script, em forma de listagem):
+    dado um conjunto de espécies escolhido pelo usuário, lista os animais dessas
+    espécies em estado de alerta — gravidade veterinária da triagem MAIS RECENTE
+    diferente de 'Normal' — com o recinto atual e o último peso registrado.
+
+    A entrada do usuário entra como parâmetro de consulta via bind expandido
+    (IN :especies), mantendo o SQL explícito e protegido contra SQL Injection.
+    """
+    if not especies:
+        return []
+
+    sql = text(
+        "SELECT a.nro_reg, a.apelido, "
+        "       e.nome_comum AS especie_nome_comum, "
+        "       e.nome_cientifico AS especie_nome_cientifico, "
+        "       t.gravidade_veterinaria, "
+        "       t.peso_ao_chegar AS ultimo_peso, "
+        "       t.data_triagem AS data_ultima_triagem, "
+        "       r.nome AS recinto_atual_nome, "
+        "       r.recinto_gefau AS recinto_atual_gefau "
+        "FROM animal a "
+        "  JOIN especie e ON e.nome_cientifico = a.especie "
+        "  JOIN triagem t ON t.animal = a.nro_reg "
+        "  LEFT JOIN alocacao al "
+        "    ON al.animal = a.nro_reg AND al.data_saida IS NULL "
+        "  LEFT JOIN recinto r ON r.recinto_gefau = al.recinto "
+        "WHERE a.especie IN :especies "
+        "  AND t.gravidade_veterinaria <> 'Normal' "
+        # Subconsulta correlacionada: apenas a triagem mais recente de cada animal.
+        "  AND t.data_triagem = ("
+        "      SELECT MAX(t2.data_triagem) FROM triagem t2 WHERE t2.animal = t.animal"
+        "  ) "
+        "ORDER BY e.nome_comum, a.apelido"
+    ).bindparams(bindparam("especies", expanding=True))
+
+    rows = (await db.execute(sql, {"especies": especies})).mappings().all()
+    return [dict(r) for r in rows]

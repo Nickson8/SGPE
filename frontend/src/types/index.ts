@@ -46,6 +46,18 @@ export interface Dashboard {
   ultimas_alocacoes: UltimaAlocacao[];
 }
 
+export interface AnimalEmAlerta {
+  nro_reg: number;
+  apelido: string | null;
+  especie_nome_comum: string | null;
+  especie_nome_cientifico: string;
+  gravidade_veterinaria: string | null;
+  ultimo_peso: number | null;
+  data_ultima_triagem: string;
+  recinto_atual_nome: string | null;
+  recinto_atual_gefau: string | null;
+}
+
 export interface AnimalResumo {
   nro_reg: number;
   apelido: string | null;

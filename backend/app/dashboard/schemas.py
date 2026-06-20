@@ -34,6 +34,20 @@ class UltimaAlocacao(BaseModel):
     data_entrada: date
 
 
+class AnimalEmAlerta(BaseModel):
+    """Animal em estado de alerta (gravidade da triagem mais recente ≠ 'Normal')."""
+
+    nro_reg: int
+    apelido: str | None
+    especie_nome_comum: str | None
+    especie_nome_cientifico: str
+    gravidade_veterinaria: str | None
+    ultimo_peso: float | None
+    data_ultima_triagem: date
+    recinto_atual_nome: str | None
+    recinto_atual_gefau: str | None
+
+
 class DashboardResponse(BaseModel):
     totais: Totais
     grupo_taxonomico: list[Fatia]

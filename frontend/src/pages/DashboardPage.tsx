@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import { api } from "../lib/api";
 import type { Dashboard } from "../types";
+import { ConsultaAlertaCard } from "../components/dashboard/ConsultaAlertaCard";
 import { KpiCard } from "../components/ui/KpiCard";
 import { OccupancyBar } from "../components/ui/OccupancyBar";
 import { Spinner } from "../components/ui/Spinner";
@@ -140,6 +141,8 @@ export function DashboardPage() {
           </div>
         </div>
       </div>
+
+      <ConsultaAlertaCard />
     </div>
   );
 }
