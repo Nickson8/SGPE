@@ -1,9 +1,11 @@
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.especies.models import Especie
 from app.animais.models import Animal
 from app.recintos.models import Alocacao, Recinto
+from app.recintos.schemas import RecintoCreate
 
 
 def percentual_ocupacao(qnt_animais: int, cap_maxima: int) -> float:
@@ -42,6 +44,24 @@ async def list_recintos(db: AsyncSession, q: str | None = None) -> list[dict]:
         )
     result = await db.execute(stmt)
     return [recinto_resumo(r) for r in result.scalars().all()]
+
+
+async def create_recinto(db: AsyncSession, data: RecintoCreate) -> dict:
+    obj = Recinto(
+        recinto_gefau=data.recinto_gefau,
+        nome=data.nome,
+        capacidade_max=data.capacidade_max,
+        qnt_animais=0,
+        qnt_especies=0,
+    )
+    db.add(obj)
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise
+    await db.refresh(obj)
+    return recinto_resumo(obj)
 
 
 async def get_recinto_detalhe(db: AsyncSession, recinto_gefau: str) -> dict | None:

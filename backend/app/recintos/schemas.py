@@ -42,3 +42,9 @@ class RecintoDetalhe(RecintoResumo):
     animais_alocados: list[AnimalAlocado]
     especies_presentes: list[EspeciePresente]
     historico_alocacoes: list[AlocacaoHistorico]
+
+
+class RecintoCreate(BaseModel):
+    recinto_gefau: str
+    nome: str
+    capacidade_max: int

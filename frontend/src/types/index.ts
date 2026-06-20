@@ -151,3 +151,9 @@ export interface RecintoDetalhe extends RecintoResumo {
   especies_presentes: EspeciePresente[];
   historico_alocacoes: AlocacaoHistorico[];
 }
+
+export interface RecintoCreate {
+  recinto_gefau: string;
+  nome: string;
+  capacidade_max: number;
+}
