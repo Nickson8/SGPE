@@ -46,7 +46,7 @@ O SGPE é um **monólito modular** dividido em três serviços orquestrados via 
 
 **Decisões de projeto importantes:**
 
-- **O esquema do banco é o núcleo do projeto** e vive em [`init-scripts/`](init-scripts/) como SQL puro. O container PostgreSQL executa esses scripts automaticamente na primeira inicialização (`/docker-entrypoint-initdb.d`): primeiro `01-create-tables.sql` (DDL), depois `02-seed-data.sql` (dados de demonstração).
+- **O esquema do banco é o núcleo do projeto** e vive em [`init-scripts/`](init-scripts/) como SQL puro. O container PostgreSQL executa esses scripts automaticamente na primeira inicialização (`/docker-entrypoint-initdb.d`): primeiro `01-esquema.sql` (DDL), depois `02-dados.sql` (dados de demonstração).
 - **Sem migrations.** O backend **não cria nem altera** tabelas. Os modelos SQLAlchemy apenas **espelham** o esquema existente para que a API possa **consultá-lo** (somente leitura).
 - O backend é organizado por **módulos de domínio** (`especies/`, `animais/`, `recintos/`, `dashboard/`), cada um com `router.py`, `services.py`, `models.py` e `schemas.py`.
 - Esta versão **não possui autenticação** (mantém um usuário fictício na interface, como o protótipo original).
@@ -58,8 +58,8 @@ SGPE/
 ├── docker-compose.yml          # orquestra postgres + backend + frontend
 ├── .env.example                # variáveis de ambiente
 ├── init-scripts/               # ESQUEMA + DADOS (executados pelo Postgres)
-│   ├── 01-create-tables.sql    #   DDL traduzido para PostgreSQL
-│   └── 02-seed-data.sql        #   dados de demonstração
+│   ├── 01-esquema.sql    #   DDL traduzido para PostgreSQL
+│   └── 02-dados.sql        #   dados de demonstração
 ├── sql/                        # scripts Oracle originais (referência histórica)
 ├── backend/                    # API FastAPI (Python, SQLAlchemy async — leitura)
 │   └── app/
