@@ -4,7 +4,7 @@ CREATE TABLE especie (
     grupo_taxonomico VARCHAR(30),
     -- 'S': Existe plano, e 'N': Não existe.
     plano_de_manejo CHAR(1),
-    quantidade INTEGER,
+    quantidade INTEGER DEFAULT 0 NOT NULL,
 
     CONSTRAINT pk_especie PRIMARY KEY(nome_cientifico),
     CONSTRAINT ck_especie_plano_manejo CHECK(plano_de_manejo IN ('S', 'N'))
@@ -65,7 +65,9 @@ CREATE TABLE restricoes (
     CONSTRAINT pk_restricoes PRIMARY KEY(animal, data_triagem, restricao),
     CONSTRAINT fk_restricoes_triagem FOREIGN KEY(animal, data_triagem)
         REFERENCES triagem(animal, data_triagem)
+        -- Perpetua a atualização da identificação do animal.
         ON UPDATE CASCADE
+        -- Caso o animal seja excluído, apagamos seus dados.
         ON DELETE CASCADE
 );
 
@@ -77,7 +79,9 @@ CREATE TABLE risco (
     CONSTRAINT pk_risco PRIMARY KEY(animal, data_triagem, risco),
     CONSTRAINT fk_risco_triagem FOREIGN KEY(animal, data_triagem)
         REFERENCES triagem(animal, data_triagem)
+        -- Perpetua a atualização da identificação do animal.
         ON UPDATE CASCADE
+        -- Caso o animal seja excluído, apagamos seus dados.
         ON DELETE CASCADE
 );
 
@@ -106,15 +110,20 @@ CREATE TABLE registro_biologico (
     CONSTRAINT pk_registro_biologico PRIMARY KEY(animal, data_triagem, data_hora_registro),
     CONSTRAINT fk_regbiologico_triagem FOREIGN KEY(animal, data_triagem)
         REFERENCES triagem(animal, data_triagem)
+        -- Perpetua a atualização da identificação do animal ou da data da triagem.
         ON UPDATE CASCADE
+        -- Caso a triagem seja excluída, apagamos os registros atrelados a ela.
         ON DELETE CASCADE,
     CONSTRAINT fk_regbiologico_funcionario FOREIGN KEY(funcionario)
         REFERENCES funcionario(cpf)
+        -- Perpetua a atualização da identificação do funcionário.
         ON UPDATE CASCADE
+        -- Enquanto houver registro, é necessário saber o responsável por ela.
         ON DELETE RESTRICT
 );
 
 CREATE TABLE registro_clinico (
+    -- Id artificial criado para facilitar as relações de FK. Deve ser incrementado automaticamente pelo banco.
     id INTEGER NOT NULL,
     animal INTEGER NOT NULL,
     data_triagem DATE NOT NULL,
@@ -127,11 +136,15 @@ CREATE TABLE registro_clinico (
     CONSTRAINT uk_registro_clinico UNIQUE(animal, data_triagem, data_hora_registro),
     CONSTRAINT fk_regclinico_triagem FOREIGN KEY(animal, data_triagem)
         REFERENCES triagem(animal, data_triagem)
+        -- Perpetua a atualização da identificação do animal ou da data da triagem.
         ON UPDATE CASCADE
+        -- Caso a triagem seja excluída, apagamos os registros atrelados a ela.
         ON DELETE CASCADE,
     CONSTRAINT fk_regclinico_funcionario FOREIGN KEY(funcionario)
         REFERENCES funcionario(cpf)
+        -- Perpetua a atualização da identificação do funcionário.
         ON UPDATE CASCADE
+        -- Enquanto houver registro, é necessário saber o responsável por ela.
         ON DELETE RESTRICT
 );
 
@@ -143,7 +156,9 @@ CREATE TABLE medicamento_administrado (
     CONSTRAINT pk_medicamento_adm PRIMARY KEY(id, medicamento),
     CONSTRAINT fk_medicamento_adm_regclinico FOREIGN KEY(id)
         REFERENCES registro_clinico(id)
+        -- Perpetua a atualização da identificação do registro clinico.
         ON UPDATE CASCADE
+        -- Sem registro, não é necessário saber os medicmentos administrados.
         ON DELETE CASCADE
 );
 
@@ -157,7 +172,9 @@ CREATE TABLE exames (
     CONSTRAINT pk_exames PRIMARY KEY(id, data_exame, tipo_exame),
     CONSTRAINT fk_exames_regclinico FOREIGN KEY(id)
         REFERENCES registro_clinico(id)
+        -- Perpetua a atualização da identificação do registro clinico.
         ON UPDATE CASCADE
+        -- Sem registro, não é necessário saber os exames.
         ON DELETE CASCADE
 );
 
@@ -182,7 +199,9 @@ CREATE TABLE alocacao (
     CONSTRAINT pk_alocacao PRIMARY KEY(animal, recinto, data_entrada),
     CONSTRAINT fk_alocacao_animal FOREIGN KEY(animal)
         REFERENCES animal(nro_reg)
+        -- Perpetua a atualização da identificação do animal.
         ON UPDATE CASCADE
+        -- Caso o animal seja excluído, apagamos seus dados.
         ON DELETE CASCADE,
     CONSTRAINT fk_alocacao_recinto FOREIGN KEY(recinto)
         REFERENCES recinto(recinto_gefau)
