@@ -7,23 +7,26 @@ diferente de 'Normal' e o peso médio desses animais, considerando apenas a
 triagem mais recente de cada animal. Exibir somente espécies com 2 ou mais
 animais em estado não-normal.
 */
-
-SELECT
+-- seleciona a última triagem de cada animal
+WITH UltimaTriagem AS (
+    -- garante apenas a primeira linha de cada animal com base na ordenação
+    SELECT DISTINCT ON (animal) 
+        animal, 
+        peso_ao_chegar, 
+        gravidade_veterinaria
+    FROM triagem
+    ORDER BY animal, data_triagem DESC
+)
+SELECT 
     e.nome_comum AS especie,
     COUNT(*) AS animais_em_alerta,
-    ROUND(AVG(t.peso_ao_chegar), 2) AS peso_medio_kg
+    ROUND(AVG(ut.peso_ao_chegar), 2) AS peso_medio_kg
 FROM especie e
     INNER JOIN animal a ON a.especie = e.nome_cientifico
-    INNER JOIN triagem t ON t.animal  = a.nro_reg
-WHERE
+    INNER JOIN UltimaTriagem ut ON ut.animal = a.nro_reg
+WHERE 
     e.plano_de_manejo = 'S'
-    AND t.gravidade_veterinaria <> 'Normal'
-    -- Subconsulta correlacionada: apenas a triagem mais recente de cada animal
-    AND t.data_triagem = (
-        SELECT MAX(t2.data_triagem)
-        FROM triagem t2
-        WHERE t2.animal = t.animal
-    )
+    AND ut.gravidade_veterinaria <> 'Normal'
 GROUP BY e.nome_comum
 HAVING COUNT(*) >= 2
 ORDER BY animais_em_alerta DESC;
@@ -130,6 +133,32 @@ WHERE NOT EXISTS (
     )
 )
 ORDER BY a.apelido;
+
+/*
+Consulta 5 - Animais residentes a longo prazo por recinto e espécie
+
+Para cada recinto e cada espécie atualmente alocada nele, calcula o número 
+de indivíduos que estão residindo no local há mais de 1 ano. Caso uma espécie 
+esteja presente no recinto, mas todos os seus indivíduos tenham chegado há 
+menos de 1 ano, a contagem retornará 0 de forma explícita.
+*/
+
+SELECT 
+    r.nome AS recinto,
+    e.nome_comum AS especie,
+    COUNT(*) FILTER (WHERE al.data_entrada <= CURRENT_DATE - INTERVAL '1 year') AS qtd_mais_de_1_ano
+FROM alocacao al
+    INNER JOIN animal a ON a.nro_reg = al.animal
+    INNER JOIN especie e ON e.nome_cientifico = a.especie
+    INNER JOIN recinto r ON r.recinto_gefau = al.recinto
+WHERE 
+    al.data_saida IS NULL -- Garante que estamos olhando apenas para quem ESTÁ no recinto hoje
+GROUP BY 
+    r.nome, 
+    e.nome_comum
+ORDER BY 
+    r.nome, 
+    e.nome_comum;
 
 /*
 Listar todos os recintos pelos quais um animal passou, 
