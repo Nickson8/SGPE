@@ -94,10 +94,10 @@ CREATE TABLE funcionario (
 CREATE TABLE registro_biologico (
     animal INTEGER NOT NULL,
     data_triagem DATE NOT NULL,
-    data_hora_registro TIMESTAMP NOT NULL, -- Alterado para TIMESTAMP para guardar a hora
+    data_hora_registro TIMESTAMP NOT NULL,
     ocorrencia VARCHAR(50),
     detalhamento VARCHAR(50),
-    anexo_laudo_saude BYTEA, -- Equivalente Postgres para BLOB
+    anexo_laudo_saude BYTEA,
     funcionario CHAR(11) NOT NULL,
 
     CONSTRAINT pk_registro_biologico PRIMARY KEY(animal, data_triagem, data_hora_registro),
@@ -115,7 +115,7 @@ CREATE TABLE registro_clinico (
     id INTEGER NOT NULL,
     animal INTEGER NOT NULL,
     data_triagem DATE NOT NULL,
-    data_hora_registro TIMESTAMP NOT NULL, -- Alterado para TIMESTAMP para guardar a hora
+    data_hora_registro TIMESTAMP NOT NULL,
     ocorrencia VARCHAR(50) NOT NULL,
     tratamento VARCHAR(50),
     funcionario CHAR(11) NOT NULL,
@@ -255,7 +255,7 @@ CREATE TABLE descricao_rotina (
 CREATE TABLE registro_rotina (
     animal INTEGER NOT NULL,
     tipo_rotina VARCHAR(20) NOT NULL,
-    data_horario TIMESTAMP NOT NULL, -- Alterado para TIMESTAMP
+    data_horario TIMESTAMP NOT NULL,
     observacoes VARCHAR(100),
     dias_semana CHAR(7) NOT NULL,
 
@@ -264,14 +264,14 @@ CREATE TABLE registro_rotina (
         REFERENCES descricao_rotina(animal, tipo_rotina)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    CONSTRAINT ck_registro_rotina_dias CHECK (LENGTH(dias_semana) = 7 AND dias_semana ~ '^[01]{7}$') -- Adaptado para Regex do Postgres
+    CONSTRAINT ck_registro_rotina_dias CHECK (LENGTH(dias_semana) = 7 AND dias_semana ~ '^[01]{7}$')
 );
 
 CREATE TABLE documento (
     tipo_documento VARCHAR(50) NOT NULL,
     nro_documento VARCHAR(50) NOT NULL,
     animal INTEGER NOT NULL,
-    anexo BYTEA NOT NULL, -- Equivalente Postgres para BLOB
+    anexo BYTEA NOT NULL,
     data_cadastro DATE NOT NULL,
     observacao VARCHAR(200),
     destino VARCHAR(50),
@@ -281,5 +281,5 @@ CREATE TABLE documento (
     CONSTRAINT fk_documento_animal FOREIGN KEY(animal)
         REFERENCES animal(nro_reg)
         ON UPDATE CASCADE
-        ON DELETE CASCADE,
+        ON DELETE CASCADE
 );

@@ -9,10 +9,10 @@ services:
       # Host 5433 -> container 5432 (evita conflito com outro Postgres local).
       - "5433:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data:z
       # Scripts executados na PRIMEIRA inicialização (volume vazio), em ordem
       # de nome de arquivo: 01-create-tables.sql depois 02-seed-data.sql.
-      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+      - ./init-scripts:/docker-entrypoint-initdb.d:z
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sgpe} -d ${POSTGRES_DB:-sgpe_db}"]
       interval: 5s
@@ -27,7 +27,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
+      - ./backend:/app:z
     depends_on:
       postgres:
         condition: service_healthy
@@ -39,8 +39,8 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/index.html:/app/index.html
+      - ./frontend/src:/app/src:z
+      - ./frontend/index.html:/app/index.html:z
     depends_on:
       - backend
 

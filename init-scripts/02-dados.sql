@@ -265,7 +265,7 @@ INSERT INTO registro_rotina (animal, tipo_rotina, data_horario, observacoes, dia
 (13, 'Enriquecimento',  '2026-01-21 09:00:00', 'Forrageou em todos os pontos',            '1111111');
 
 -- Documentos (Anexo BYTEA NOT NULL; consistência de migração)
-INSERT INTO documento (tipo_documento, nro_documento, animal, anexo, data_cadastro, observacao, tipo_migracao, destino, origem) VALUES
-('Termo de Transferência', 'DOC-9921-A', 1,  convert_to('termo_juma.pdf','UTF8'),       '2021-01-10', 'Cedida pelo Zoológico de São Paulo',  'Entrada', NULL, 'Zoológico de São Paulo'),
-('Laudo de Nascimento',    'DOC-1122-B', 3,  convert_to('laudo_nasc_dengo.pdf','UTF8'), '2021-03-15', 'Nascido em cativeiro autorizado',     'Entrada', NULL, 'Maternidade BioParque'),
-('Laudo de Necrópsia',     'DOC-3030-C', 30, convert_to('laudo_casco.pdf','UTF8'),      '2024-05-01', 'Documento clínico comum',             NULL,      NULL, NULL);
+INSERT INTO documento (tipo_documento, nro_documento, animal, anexo, data_cadastro, observacao, destino, origem) VALUES
+('Termo de Transferência', 'DOC-9921-A', 1,  convert_to('termo_juma.pdf','UTF8'),       '2021-01-10', 'Cedida pelo Zoológico de São Paulo', NULL, 'Zoológico de São Paulo'),
+('Laudo de Nascimento',    'DOC-1122-B', 3,  convert_to('laudo_nasc_dengo.pdf','UTF8'), '2021-03-15', 'Nascido em cativeiro autorizado',    NULL, 'Maternidade BioParque'),
+('Laudo de Necrópsia',     'DOC-3030-C', 30, convert_to('laudo_casco.pdf','UTF8'),      '2024-05-01', 'Documento clínico comum',            NULL, NULL);
