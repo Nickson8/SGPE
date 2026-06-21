@@ -282,7 +282,6 @@ CREATE TABLE documento (
     anexo BYTEA NOT NULL, -- Equivalente Postgres para BLOB
     data_cadastro DATE NOT NULL,
     observacao VARCHAR(200),
-    tipo_migracao VARCHAR(20),
     destino VARCHAR(50),
     origem VARCHAR(50),
 
@@ -291,10 +290,4 @@ CREATE TABLE documento (
         REFERENCES animal(nro_reg)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    CONSTRAINT ck_documento_migracao CHECK (tipo_migracao IN ('Entrada', 'Baixa', NULL)),
-    CONSTRAINT ck_documento_especializacao CHECK (
-        (tipo_migracao = 'Entrada' AND origem IS NOT NULL AND destino IS NULL) OR
-        (tipo_migracao = 'Baixa' AND destino IS NOT NULL AND origem IS NULL) OR
-        (tipo_migracao IS NULL AND origem IS NULL AND destino IS NULL)
-    )
 );
