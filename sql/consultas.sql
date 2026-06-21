@@ -137,28 +137,29 @@ ORDER BY a.apelido;
 /*
 Consulta 5 - Animais residentes a longo prazo por recinto e espécie
 
-Para cada recinto e cada espécie atualmente alocada nele, calcula o número 
-de indivíduos que estão residindo no local há mais de 1 ano. Caso uma espécie 
+Para cada espécie (nome científico), de cada recinto (código e nome), contar 
+o número de indivíduos que estão no recinto há mais de 1 ano. Caso uma espécie 
 esteja presente no recinto, mas todos os seus indivíduos tenham chegado há 
 menos de 1 ano, a contagem retornará 0 de forma explícita.
 */
 
 SELECT 
-    r.nome AS recinto,
-    e.nome_comum AS especie,
+    r.recinto_gefau AS codigo_gefau_recinto,
+    r.nome AS nome_recinto,
+    a.especie,
     COUNT(*) FILTER (WHERE al.data_entrada <= CURRENT_DATE - INTERVAL '1 year') AS qtd_mais_de_1_ano
 FROM alocacao al
     INNER JOIN animal a ON a.nro_reg = al.animal
-    INNER JOIN especie e ON e.nome_cientifico = a.especie
     INNER JOIN recinto r ON r.recinto_gefau = al.recinto
 WHERE 
-    al.data_saida IS NULL -- Garante que estamos olhando apenas para quem ESTÁ no recinto hoje
+    al.data_saida IS NULL -- Apenas indivíduos atualmente no recinto
 GROUP BY 
+    r.recinto_gefau, 
     r.nome, 
-    e.nome_comum
+    a.especie
 ORDER BY 
     r.nome, 
-    e.nome_comum;
+    a.especie;
 
 /*
 Listar todos os recintos pelos quais um animal passou, 
