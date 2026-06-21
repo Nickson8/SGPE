@@ -1,0 +1,26 @@
+# Notas de planejamento locais
+planos/
+
+# Ambiente
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node / frontend
+node_modules/
+dist/
+*.local
+
+# Banco / dados
+pgdata/
+
+# Editores / SO
+.DS_Store
+.idea/
+.vscode/
+
+CLAUDE.md
