@@ -210,6 +210,7 @@ CREATE TABLE casal (
         ON UPDATE CASCADE
         ON DELETE CASCADE,
     CONSTRAINT ck_casal_diferentes CHECK (animal_1 <> animal_2)
+    -- Garantir via Trigger que o casal tenha mesma espécie.
 );
 
 CREATE TABLE prole (
@@ -226,6 +227,7 @@ CREATE TABLE prole (
         REFERENCES animal(nro_reg)
         ON UPDATE CASCADE
         ON DELETE CASCADE
+    -- Garantir via Trigger que a prole seja da mesma espécie dos pais.
 );
 
 CREATE TABLE item_cardapio (
