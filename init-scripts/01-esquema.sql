@@ -205,8 +205,10 @@ CREATE TABLE alocacao (
         ON DELETE CASCADE,
     CONSTRAINT fk_alocacao_recinto FOREIGN KEY(recinto)
         REFERENCES recinto(recinto_gefau)
+        -- Perpetua a atualização da identificação do recinto.
         ON UPDATE CASCADE
-        ON DELETE RESTRICT,
+        -- Se o recinto não existir mais, descarta-se suas alocações.
+        ON DELETE CASCADE,
     CONSTRAINT ck_alocacao_datas CHECK (data_saida IS NULL OR data_saida > data_entrada)
 );
 
@@ -217,11 +219,15 @@ CREATE TABLE casal (
     CONSTRAINT pk_casal PRIMARY KEY(animal_1, animal_2),
     CONSTRAINT fk_casal_animal1 FOREIGN KEY(animal_1)
         REFERENCES animal(nro_reg)
+        -- Perpetua a atualização da identificação do animal.
         ON UPDATE CASCADE
+        -- Sem animal, não é necessário guardar seus relacionamentos.
         ON DELETE CASCADE,
     CONSTRAINT fk_casal_animal2 FOREIGN KEY(animal_2)
         REFERENCES animal(nro_reg)
+        -- Perpetua a atualização da identificação do animal.
         ON UPDATE CASCADE
+        -- Sem animal, não é necessário guardar seus relacionamentos.
         ON DELETE CASCADE,
     CONSTRAINT ck_casal_diferentes CHECK (animal_1 <> animal_2)
     -- Garantir via Trigger que o casal tenha mesma espécie.
@@ -254,7 +260,9 @@ CREATE TABLE item_cardapio (
     CONSTRAINT pk_item_cardapio PRIMARY KEY(animal, alimento),
     CONSTRAINT fk_item_cardapio_animal FOREIGN KEY(animal)
         REFERENCES animal(nro_reg)
+        -- Perpetua a atualização da identificação do animal.
         ON UPDATE CASCADE
+        -- Caso o animal seja excluído, apagamos seus dados.
         ON DELETE CASCADE
 );
 
@@ -271,7 +279,9 @@ CREATE TABLE descricao_rotina (
     CONSTRAINT pk_descricao_rotina PRIMARY KEY(animal, tipo_rotina),
     CONSTRAINT fk_descricao_rotina_animal FOREIGN KEY(animal)
         REFERENCES animal(nro_reg)
+        -- Perpetua a atualização da identificação do animal.
         ON UPDATE CASCADE
+        -- Caso o animal seja excluído, apagamos seus dados.
         ON DELETE CASCADE,
     CONSTRAINT ck_desc_rotina_tipo CHECK (tipo_rotina IN ('Condicionamento', 'Enriquecimento'))
 );
@@ -286,7 +296,9 @@ CREATE TABLE registro_rotina (
     CONSTRAINT pk_registro_rotina PRIMARY KEY(animal, tipo_rotina, data_horario),
     CONSTRAINT fk_registro_rotina_desc FOREIGN KEY(animal, tipo_rotina)
         REFERENCES descricao_rotina(animal, tipo_rotina)
+        -- Perpetua a atualização da identificação do animal.
         ON UPDATE CASCADE
+        -- Caso o animal seja excluído, apagamos seus dados.
         ON DELETE CASCADE,
     CONSTRAINT ck_registro_rotina_dias CHECK (LENGTH(dias_semana) = 7 AND dias_semana ~ '^[01]{7}$')
 );
@@ -304,6 +316,8 @@ CREATE TABLE documento (
     CONSTRAINT pk_documento PRIMARY KEY(tipo_documento, nro_documento),
     CONSTRAINT fk_documento_animal FOREIGN KEY(animal)
         REFERENCES animal(nro_reg)
+        -- Perpetua a atualização da identificação do animal.
         ON UPDATE CASCADE
+        -- Caso o animal seja excluído, apagamos seus dados.
         ON DELETE CASCADE
 );
