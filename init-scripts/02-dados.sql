@@ -1,23 +1,6 @@
--- =====================================================================
--- SGPE — Dados de demonstração (PostgreSQL)
--- =====================================================================
--- Baseado no sql/dados.sql original, porém REESCRITO para CONFORMAR ao
--- DDL normalizado (01-create-tables.sql) e EXPANDIDO para popular bem os
--- dashboards e as linhas do tempo do prontuário.
---
--- Por que reescrito e não apenas "traduzido": o sql/dados.sql original foi
--- escrito contra uma versão anterior do esquema e é INCOMPATÍVEL com o DDL
--- atual (nomes de colunas acentuados/diferentes, valores que violam os
--- CHECKs — ex.: Funcao 'Veterinário' vs 'VETERINARIO', PlanoDeManejo texto
--- livre vs 'S'/'N', DiasSemana 'Segunda-feira' vs binário, ScoreCorporal
--- texto vs FLOAT, NroLivro repetido vs UNIQUE/INTEGER). O DDL é o núcleo
--- imutável, então os dados foram ajustados para respeitá-lo, preservando os
--- mesmos animais/espécies/recintos no espírito do original.
---
 -- Animais "destaque" (1 Juma, 3 Dengo, 8 Mancha, 13 Aurélio, 19 Tuco,
 -- 27 Dentão) recebem várias triagens + registros + medicações + exames +
 -- alertas, para que os gráficos de evolução e a timeline fiquem ricos.
--- =====================================================================
 
 -- Espécies
 INSERT INTO especie (nome_cientifico, nome_comum, grupo_taxonomico, plano_de_manejo, quantidade) VALUES
