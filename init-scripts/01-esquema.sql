@@ -36,8 +36,9 @@ CREATE TABLE animal (
     CONSTRAINT ck_animal_data_nasc CHECK(data_nasc <= CURRENT_DATE),
     CONSTRAINT fk_animal_especie FOREIGN KEY(especie)
         REFERENCES especie(nome_cientifico)
-        ON UPDATE CASCADE
-        ON DELETE RESTRICT
+        ON UPDATE CASCADE -- Perpetua a atualização do nome da espécie.
+        -- Se há um animal dessa espécie, não se deve apagar ela.
+        ON DELETE RESTRICT 
 );
 
 CREATE TABLE triagem (
@@ -54,7 +55,9 @@ CREATE TABLE triagem (
     CONSTRAINT ck_triagem_data CHECK (data_triagem <= CURRENT_DATE),
     CONSTRAINT fk_triagem_animal FOREIGN KEY(animal)
         REFERENCES animal(nro_reg)
-        ON UPDATE CASCADE
+        -- Perpetua a atualização da identificação do animal.
+        ON UPDATE CASCADE 
+        -- Caso o animal seja excluído, apagamos seus dados.
         ON DELETE CASCADE
 );
 
