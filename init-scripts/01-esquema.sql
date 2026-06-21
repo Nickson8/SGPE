@@ -1,7 +1,3 @@
------------------------------------------------------------------------
--------------------------- PARTE JUAN (REVISADA) ----------------------
------------------------------------------------------------------------
-
 CREATE TABLE especie (
     nome_cientifico VARCHAR(30) NOT NULL,
     nome_comum VARCHAR(30),
@@ -87,12 +83,12 @@ CREATE TABLE funcionario (
     cpf CHAR(11) NOT NULL,
     nome VARCHAR(30),
     telefone VARCHAR(20),
-    funcao VARCHAR(20) DEFAULT 'VISITANTE',
+    funcao VARCHAR(20) DEFAULT 'Visitante',
 
     CONSTRAINT pk_funcionario PRIMARY KEY(cpf),
     CONSTRAINT ck_func_cpf CHECK(LENGTH(cpf) = 11),
     CONSTRAINT ck_func_telefone CHECK(LENGTH(telefone) >= 8),
-    CONSTRAINT ck_func_funcao CHECK (funcao IN ('ADMINISTRADOR', 'VETERINARIO', 'BIOLOGO', 'VISITANTE'))
+    CONSTRAINT ck_func_funcao CHECK (funcao IN ('Administrador', 'Veterinário', 'Biólogo', 'Visitante'))
 );
 
 CREATE TABLE registro_biologico (
@@ -161,10 +157,6 @@ CREATE TABLE exames (
         ON UPDATE CASCADE
         ON DELETE CASCADE
 );
-
------------------------------------------------------------------------
--------------------------- PARTE DANTE (REVISADA) ---------------------
------------------------------------------------------------------------
 
 CREATE TABLE recinto (
     recinto_gefau VARCHAR(30) NOT NULL,
