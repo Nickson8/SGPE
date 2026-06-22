@@ -58,14 +58,14 @@ SGPE/
 ├── docker-compose.yml          # orquestra postgres + backend + frontend
 ├── .env.example                # variáveis de ambiente
 ├── init-scripts/               # ESQUEMA + DADOS (executados pelo Postgres)
-│   ├── 01-esquema.sql    #   DDL traduzido para PostgreSQL
-│   └── 02-dados.sql        #   dados de demonstração
+│   ├── 01-esquema.sql          # DDL traduzido para PostgreSQL
+│   └── 02-dados.sql            # dados de demonstração
 ├── sql/                        # scripts Oracle originais (referência histórica)
 ├── backend/                    # API FastAPI (Python, SQLAlchemy async — leitura)
 │   └── app/
-│       ├── core/               #   config + conexão com o banco
+│       ├── core/               # config + conexão com o banco
 │       ├── especies/ animais/ recintos/ dashboard/   # módulos de domínio
-│       └── shared/             #   modelos de tabelas sem endpoint dedicado
+│       └── shared/             # modelos de tabelas sem endpoint dedicado
 └── frontend/                   # SPA React + Vite + Tailwind v4
     └── src/{pages,components,contexts,lib,types}
 ```
@@ -77,21 +77,20 @@ SGPE/
 ### 📊 Dashboard de Conservação
 KPIs do plantel (animais, espécies, % com plano de manejo, recintos em alerta), distribuição por **grupo taxonômico** e por **sexo**, barras de **ocupação dos recintos** e **últimas alocações**.
 
-![Dashboard de Conservação](docs/screenshots/dashboard.png)
+![Dashboard de Conservação](docs/screenshots/Dashboard1)
+![Dashboard de Conservação 2](docs/screenshots/Dashboard2)
 
 ### 🩺 Prontuário Digital
 Busca de animais e ficha individual completa: dados do animal, **alertas** (restrições e riscos), **gráficos de evolução** de peso e score corporal, **medicações**, **exames** e uma **linha do tempo** unindo registros clínicos e biológicos.
 
-![Seleção de Animal](docs/screenshots/prontuario_selecao.png)
-![Prontuário — Detalhes do Animal](docs/screenshots/prontuario_detalhes.png)
+![Seleção de Animal](docs/screenshots/Prontuario1.png)
+![Prontuário — Detalhes do Animal](docs/screenshots/Prontuario2.png)
 
 ### 🏠 Recintos
 Grade de recintos com indicadores de ocupação, e página de detalhe com animais alocados, espécies presentes e histórico de movimentações.
 
-![Seleção de Recinto](docs/screenshots/recintos_selecao.png)
-![Detalhes do Recinto](docs/screenshots/recinto_detalhes.png)
-
-> ℹ️ As capturas em `docs/screenshots/` devem ser atualizadas com telas da nova interface React (basta substituir os arquivos `.png` mantendo os nomes).
+![Seleção de Recinto](docs/screenshots/Recintos1.png)
+![Detalhes do Recinto](docs/screenshots/Recintos2.png)
 
 ---
 
@@ -146,22 +145,6 @@ Para parar mantendo os dados: `docker compose down`.
 | **ORM (leitura)** | SQLAlchemy 2 (async) + asyncpg |
 | **Banco de Dados** | PostgreSQL 16 |
 | **Orquestração** | Docker Compose |
-
----
-
-## 🗄️ Sobre o banco de dados
-
-O esquema relacional é o coração acadêmico do projeto. Os scripts originais foram escritos para **Oracle** (em [`sql/`](sql/)) e **traduzidos para PostgreSQL** em [`init-scripts/`](init-scripts/), preservando tabelas, chaves e restrições (apenas adaptando sintaxe: `VARCHAR2`→`VARCHAR`, `BLOB`→`BYTEA`, `REGEXP_LIKE`→`~`, etc.). São 18 entidades, incluindo `ESPECIE`, `ANIMAL`, `RECINTO`, `ALOCACAO`, `TRIAGEM`, `REGISTROCLINICO`, `REGISTROBIOLOGICO`, `EXAMES` e `MEDICAMENTOADMINISTRADO`, entre outras.
-
----
-
-## 📝 Próximos Passos
-
-- [ ] Autenticação e controle de acesso (login, perfis)
-- [ ] Operações de escrita (cadastro/edição de animais, recintos e registros)
-- [ ] Módulos de cardápio, rotinas, genealogia e documentos (já modelados no banco)
-- [ ] Modelgem das consultas programadas em sql/ para a interface
-- [ ] Deploy para produção
 
 ---
 
