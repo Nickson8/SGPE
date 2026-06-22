@@ -108,7 +108,7 @@ CREATE TABLE registro_biologico (
     funcionario CHAR(11) NOT NULL,
 
     CONSTRAINT pk_registro_biologico PRIMARY KEY(animal, data_triagem, data_hora_registro),
-
+    CONSTRAINT ck_reg_data_biologico CHECK (DATE(data_hora_registro) >= data_triagem),
     -- Considera-se que no contrato do funcionario, é permitido guardar seu cpf, mesmo após sua demissão.
     CONSTRAINT fk_regbiologico_triagem FOREIGN KEY(animal, data_triagem)
         REFERENCES triagem(animal, data_triagem)
@@ -137,6 +137,7 @@ CREATE TABLE registro_clinico (
 
     CONSTRAINT pk_registro_clinico PRIMARY KEY(id),
     CONSTRAINT uk_registro_clinico UNIQUE(animal, data_triagem, data_hora_registro),
+    CONSTRAINT ck_reg_data_clinico CHECK (DATE(data_hora_registro) >= data_triagem),
 
     -- Considera-se que no contrato do funcionario, é permitido guardar seu cpf, mesmo após sua demissão.
     CONSTRAINT fk_regclinico_triagem FOREIGN KEY(animal, data_triagem)
