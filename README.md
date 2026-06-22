@@ -77,8 +77,8 @@ SGPE/
 ### 📊 Dashboard de Conservação
 KPIs do plantel (animais, espécies, % com plano de manejo, recintos em alerta), distribuição por **grupo taxonômico** e por **sexo**, barras de **ocupação dos recintos** e **últimas alocações**.
 
-![Dashboard de Conservação](docs/screenshots/Dashboard1)
-![Dashboard de Conservação 2](docs/screenshots/Dashboard2)
+![Dashboard de Conservação](docs/screenshots/Dashboard1.png)
+![Dashboard de Conservação 2](docs/screenshots/Dashboard2.png)
 
 ### 🩺 Prontuário Digital
 Busca de animais e ficha individual completa: dados do animal, **alertas** (restrições e riscos), **gráficos de evolução** de peso e score corporal, **medicações**, **exames** e uma **linha do tempo** unindo registros clínicos e biológicos.
