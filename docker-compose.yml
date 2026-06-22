@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sgpe}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sgpe}
+      POSTGRES_DB: ${POSTGRES_DB:-sgpe_db}
+    ports:
+      # Host 5433 -> container 5432 (evita conflito com outro Postgres local).
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data:z
+      # Scripts executados na PRIMEIRA inicialização (volume vazio), em ordem
+      # de nome de arquivo: 01-create-tables.sql depois 02-seed-data.sql.
+      - ./init-scripts:/docker-entrypoint-initdb.d:z
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sgpe} -d ${POSTGRES_DB:-sgpe_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://sgpe:sgpe@postgres:5432/sgpe_db}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app:z
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/src:z
+      - ./frontend/index.html:/app/index.html:z
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
