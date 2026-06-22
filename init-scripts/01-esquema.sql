@@ -214,8 +214,9 @@ CREATE TABLE alocacao (
         REFERENCES recinto(recinto_gefau)
         -- Propaga a atualização da identificação do recinto.
         ON UPDATE CASCADE
-        -- Se o recinto não existir mais, descarta-se suas alocações.
-        ON DELETE CASCADE,
+        -- Alocação guarda o histórico de movimentação de um animal
+        -- que é uma informação de extrema importância para o parque.
+        ON DELETE RESTRICT,
     CONSTRAINT ck_alocacao_datas CHECK (data_saida IS NULL OR data_saida > data_entrada)
 );
 
